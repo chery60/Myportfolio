@@ -1,0 +1,138 @@
+---
+title: "User Management"
+publishedAt: "2022-08-15"
+updatedAt: "2026-08-09"
+author: "Sai Charan Kalla"
+summary: "Enterprise user management case study for Oracle, covering unified access workflows, data complexity, information architecture, low-fidelity and high-fidelity design."
+image: "/project-user-management.png"
+---
+
+export const withBasePath = (path) => ((process.env.GITHUB_PAGES === "true" ? "/" + (process.env.GITHUB_PAGES_REPOSITORY || "Myportfolio") : process.env.NEXT_PUBLIC_BASE_PATH) || "") + path;
+
+> Allowing customers to fully onboard, provision, and manage users or employees from a common place.
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <img src={withBasePath("/case-studies/user-management/01-usermanagement.png")} alt="User Management hero image" className="h-auto w-full" />
+</div>
+
+---
+
+## Introduction
+
+Oracle’s Food and Beverage Global Business Unit offers several enterprise software solutions, including the Enterprise Management Console (EMC), Backoffice, Point of Sale (POS), and Kitchen Display System (KDS). Each of these had its own user management system, which made it challenging to manage users across multiple products. To solve this, the team decided to create a unified user management system to streamline user management across all the platforms.
+
+## Back Story
+
+The team has decided to build a single platform to fully maintain Back Office, Point of Sale (POS), Enterprise Management Console (EMC) users, and their access. The entire back office software is built on a different architecture (OJET-6). The Enterprise Management Console software was upgraded to a new OJET-12 which supported a complete stack of components to make for a new redwood design system.
+
+## Problem Statement (‘How might we’ statement)
+
+How might we help an administrator add and manage user access of all employees across the Back Office, EMC, and POS from a single unified platform?
+
+## Identification of problems
+
+### Know Problems:
+
+1. Building a Unified platform supporting both the architectures (i.e. OJET 6 and OJET 12 level architectural components should be collaborated)<br />
+2. Unifying the data flows(i.e. defining the data points and saving triggers) for both the respective product's onboarding journeys was different and the data got saved to their respective database tables.<br />
+3. Filtering of Users as the users for both the plates will be migrated to a new unified platform<br />
+4. Building two different workflows one which supports labor management products and one which doesn’t support<br />
+5. Managing the access of common employees present on both platforms which includes deletion of users, and managing permission among zones, revenue centers, and locations.
+
+### Unknown Problems
+
+1. Improving the information architecture. To build the right workflows<br />
+2. Improving the overall product experience by handling the component mismatch and screen responsiveness.
+
+## Defining the User Goals
+
+Connected with the respective PMs and stakeholders and defined all the user goals so that the system could be built.
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <iframe title="User management" src="https://www.figma.com/embed?embed_host=share&amp;url=https%3A%2F%2Fwww.figma.com%2Fproto%2FZpKVod4tqUXzSMQJqA9nQx%2FUser-Management%3Fpage-id%3D125%253A82242%26node-id%3D125-82243%26node-type%3DFRAME%26viewport%3D622%252C474%252C0.04%26t%3Dsl4utchewtM699yB-1%26scaling%3Dcontain%26content-scaling%3Dfixed" className="h-[450px] w-full" allowFullScreen />
+</div>
+
+## Approach to Problems
+
+### Know Problems:
+
+Building a Unified platform supporting both the architectures (i.e. OJET 6 and OJET 12 level architectural components should be collaborated ) —<br />
+1. The entire product of the back office was built on OJET 6. so uplifting the entire product to OJET 12 to build the product using the new redwood design system would take a lot of time. so the team has decided to build the user management using the ALTA SC component library (an intermediate component stack used to upgrade the very old Oracle products before the full all-new redwood design system build)<br />
+2. Made a list of all the components that could support the framework and build a low-fidelity workflow to conduct the first-level user interviews.<br />
+Unifying the data flows(i.e. defining the data points and saving triggers) for both the respective product onboarding journeys was different and the data got saved to their respective database tables —<br />
+1. The process of user creation and copying users from the platforms was different for the two respective products so built a UI that supported setting the save triggers and fetching data in the workflow.<br />
+2. After talking to the stakeholders and understanding the current system built the shape of the data so that I could use that data to build the layout.
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <img src={withBasePath("/case-studies/user-management/02-shapeofdata.png")} alt="User management" className="h-auto w-full" />
+</div>
+
+## Filtering of Users as the users for both the plates will be migrated to a new unified platform
+
+1. As the user persona was an administrator based on the persona I designed the table and added an advanced search bar using which the administrator could easily filter out the users.<br />
+2. I talked to the users and understood what columns they would require which they came across on the landing page.
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <img src={withBasePath("/case-studies/user-management/03-search.png")} alt="User management" className="h-auto w-full" />
+</div>
+
+### Building two different workflows one which supports labor management products and one which doesn't support -
+
+For a user if the labor management is enabled some of the settings were changed for the user in the entire workflow. so connected with the stakeholders and understood the behavior of the system.
+
+## Unknown Problems
+
+### Improving the information architecture. To build the right workflows -
+
+After building the initial low-fidelity workflow and testing with the real users, I got some observations and re-iterated the designs based on the developer's feedback and the user's feedback
+
+## Legacy UI
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <iframe title="User management" src="https://www.figma.com/embed?embed_host=share&amp;url=https%3A%2F%2Fwww.figma.com%2Fdesign%2FZpKVod4tqUXzSMQJqA9nQx%2FUser-Management%3Fnode-id%3D110-91492%26t%3DjaxfOFzF2lsf3J5q-1" className="h-[450px] w-full" allowFullScreen />
+</div>
+
+## User flow and information Level
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <iframe title="User management" src="https://www.figma.com/embed?embed_host=share&amp;url=https%3A%2F%2Fwww.figma.com%2Fdesign%2FZpKVod4tqUXzSMQJqA9nQx%2FUser-Management%3Fnode-id%3D85-90424%26t%3DjaxfOFzF2lsf3J5q-1" className="h-[450px] w-full" allowFullScreen />
+</div>
+
+## Information Architecture
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <iframe title="User management" src="https://www.figma.com/embed?embed_host=share&amp;url=https%3A%2F%2Fwww.figma.com%2Fdesign%2FZpKVod4tqUXzSMQJqA9nQx%2FUser-Management%3Fnode-id%3D85-91313%26t%3DjaxfOFzF2lsf3J5q-1" className="h-[450px] w-full" allowFullScreen />
+</div>
+
+## Low fidelity wireframes
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <iframe title="User management" src="https://www.figma.com/embed?embed_host=share&amp;url=https%3A%2F%2Fwww.figma.com%2Fdesign%2FZpKVod4tqUXzSMQJqA9nQx%2FUser-Management%3Fnode-id%3D129-258280%26t%3DjaxfOFzF2lsf3J5q-1" className="h-[450px] w-full" allowFullScreen />
+</div>
+
+## High fidelity wireframes
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <iframe title="User management" src="https://www.figma.com/embed?embed_host=share&amp;url=https%3A%2F%2Fwww.figma.com%2Fdesign%2FZpKVod4tqUXzSMQJqA9nQx%2FUser-Management%3Fnode-id%3D129-167288%26t%3DjaxfOFzF2lsf3J5q-1" className="h-[450px] w-full" allowFullScreen />
+</div>
+
+## Building the High-Fidelity Wireframes in the OJET 16
+
+1. After conducting the user interviews and talking to developers, iterated the workflows and built the high-fidelity wireframes<br />
+2. Based on the requirements build responsive screens<br />
+3. Worked on all the error cases and handled them.<br />
+4. Worked on the A11Y specs
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <img src={withBasePath("/case-studies/user-management/04-a11ysepc-1.png")} alt="User management" className="h-auto w-full" />
+</div>
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <img src={withBasePath("/case-studies/user-management/05-a11yspec2.png")} alt="User management" className="h-auto w-full" />
+</div>
+
+That's how the product workflow was built and handed off to the developers. I learned a lot from the senior designers and stakeholders during this journey.
+
+Please 👏🏻 if you enjoyed this article. Feel free to get in touch with me at kc60488charan@gmail.com for any recommendations and suggestions.
+
+Namaste! 🙏

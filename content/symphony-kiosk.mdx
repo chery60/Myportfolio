@@ -1,0 +1,149 @@
+---
+title: "Symphony Kiosk"
+publishedAt: "2024-01-15"
+updatedAt: "2026-08-09"
+author: "Sai Charan Kalla"
+summary: "Guest self-ordering kiosk case study covering problem discovery, user goals, personas, journeys, data shape, task flows, and prototype handoff."
+image: "/project-symphony-kiosk.png"
+---
+
+export const withBasePath = (path) => ((process.env.GITHUB_PAGES === "true" ? "/" + (process.env.GITHUB_PAGES_REPOSITORY || "Myportfolio") : process.env.NEXT_PUBLIC_BASE_PATH) || "") + path;
+
+> Guest self-ordering within the restaurant.
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <img src={withBasePath("/case-studies/symphony-kiosk/01-kiosk.png")} alt="Symphony Kiosk hero image" className="h-auto w-full" />
+</div>
+
+---
+
+## Introduction
+
+Oracle’s Food and Beverage Global Business Unit provides a comprehensive suite of enterprise software solutions designed for various restaurant types, including quick-service restaurants (QSRs), fast casuals, limited service restaurants, and stadiums. Our current system connects the Enterprise Management Console (EMC), Point of Sale (POS), and Kitchen Display System (KDS) to create a seamless food ordering experience. However, we’ve identified a gap in the ordering process, particularly for QSRs and similar venues. To address this, we’re introducing a new entity—the kiosk. This solution is aimed at increasing orders, influencing consumer buying behavior, and driving higher engagement.
+
+## Back Story
+
+Oracle was building a new guest self-ordering experience with a kiosk, which deals with ordering the food to pick up the ordered food. The hardware was also built by Oracle FBGBU unit. Everything was to be built from scratch.
+
+### Currently
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <img src={withBasePath("/case-studies/symphony-kiosk/02-currently.png")} alt="Symphony Kiosk" className="h-auto w-full" />
+</div>
+
+## Identification of Problem
+
+The restaurants and food courts at stadiums used to get so many orders daily. here is the list of identified problems —<br />
+1. The staff to serve the orders was less.<br />
+2. Order entry errors.<br />
+3. The time to take orders was very high.<br />
+4. People with disabilities found it hard to give orders<br />
+5. The person who is introverted in nature was unable to order their food.<br />
+6. The delivery of ordered food items was a pain.<br />
+7. Making payments on receiving orders was a pain<br />
+8. Persons with language issues (mostly foreigners) are unable to order food efficiently.
+
+### How could building a Kiosk would reduce the amount of effort and solve the problems?
+
+1. The effort to take orders will be drastically reduced as a result the less staff is required to take orders and they can focus on delivering the ordered food.<br />
+2. As the Person himself was ordering the food taking orders with errors was reduced.<br />
+3. With the kiosk, the ordering will be a very fast and smooth experience.<br />
+4. Persons with introverted nature can order on their own.<br />
+5. The delivery of food will be easy as the Kiosk gives an estimated time to get the food delivered and even gets a notification on mobile on food being ready to be delivered.<br />
+6. Using a kiosk, the payments are also made easy for the ordered food.
+
+### Introducing Kiosk
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <img src={withBasePath("/case-studies/symphony-kiosk/03-introducing-kiosk.png")} alt="Symphony Kiosk" className="h-auto w-full" />
+</div>
+
+## User Goals
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <img src={withBasePath("/case-studies/symphony-kiosk/04-usergoal1.png")} alt="usergoal image" className="h-auto w-full" />
+</div>
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <img src={withBasePath("/case-studies/symphony-kiosk/05-usergoal2.png")} alt="usergoal image" className="h-auto w-full" />
+</div>
+
+## User Persona
+
+Based on our study of customers visiting the restaurants, we categorized them into two modes: express mode and browsing mode. See the image below for more details.
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <img src={withBasePath("/case-studies/symphony-kiosk/06-persona.png")} alt="usergoal image" className="h-auto w-full" />
+</div>
+
+## Success matrix
+
+To define the success metrics, we’ve broken down the entire food ordering journey into three phases: Pre-order, Order and Pay, and Post-order experience. In each phase, we’ve identified potential gaps that could affect the overall ordering experience. See the image below for details.
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <img src={withBasePath("/case-studies/symphony-kiosk/07-success-matrix.png")} alt="usergoal image" className="h-auto w-full" />
+</div>
+
+## User journey
+
+We further broke down each of the three phases into specific steps or actions the user would take, and identified the pain points along the way. See the below image for details.
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <img src={withBasePath("/case-studies/symphony-kiosk/08-user-journey.png")} alt="user journey image" className="h-auto w-full" />
+</div>
+
+## Shape of data
+
+Shape of data refers to the information collected to guide the design of the UI layout. This data helps in deciding which UI components to include.
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <img src={withBasePath("/case-studies/symphony-kiosk/09-shape-of-data1.png")} alt="Symphony Kiosk" className="h-auto w-full" />
+</div>
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <img src={withBasePath("/case-studies/symphony-kiosk/10-shape-of-data2.png")} alt="Symphony Kiosk" className="h-auto w-full" />
+</div>
+
+## Approach to solution
+
+Build the entire site map after talking to users and understanding the entire process from entering a restaurant to getting the ordered food delivered.
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <iframe title="Symphony Kiosk" src="https://www.figma.com/embed?embed_host=share&amp;url=https%3A%2F%2Fwww.figma.com%2Fdesign%2Fo3nHV47UkzxHDz7OMfDrn2%2FKiosk%3Fnode-id%3D2436-101059%26t%3DXcAcp2RB1DUJyLrq-1" className="h-[450px] w-full" allowFullScreen />
+</div>
+
+### Building view summary
+
+Once the sitemap was approved, I created both portrait and landscape low-fidelity designs for each unique screen. After testing these with users, I moved on to developing the high-fidelity designs.
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <iframe title="Symphony Kiosk" src="https://www.figma.com/embed?embed_host=share&amp;url=https%3A%2F%2Fwww.figma.com%2Fdesign%2Fo3nHV47UkzxHDz7OMfDrn2%2FKiosk%3Fnode-id%3D65860-7363%26t%3DXcAcp2RB1DUJyLrq-1" className="h-[450px] w-full" allowFullScreen />
+</div>
+
+## Task flows
+
+After finalizing the screens, we broke down the entire sitemap into smaller, manageable flows that developers could build and test in phases.
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <iframe title="Symphony Kiosk" src="https://www.figma.com/embed?embed_host=share&amp;url=https%3A%2F%2Fwww.figma.com%2Fdesign%2Fo3nHV47UkzxHDz7OMfDrn2%2FKiosk%3Fnode-id%3D5470-288291%26t%3DWnOiYPvqKAPmPTdm-1" className="h-[450px] w-full" allowFullScreen />
+</div>
+
+## Prototype presentation
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <video controls className="h-auto w-full">
+    <source src={withBasePath("/case-studies/symphony-kiosk/11-kioskrecording1.webm")} type="video/webm" />
+  </video>
+</div>
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <video controls className="h-auto w-full">
+    <source src={withBasePath("/case-studies/symphony-kiosk/12-kioskrec2.webm")} type="video/webm" />
+  </video>
+</div>
+
+That's how the product workflow was built and handed off to the developers.
+
+Please 👏🏻 if you enjoyed this article. Feel free to get in touch with me at kc60488charan@gmail.com for any recommendations and suggestions.
+
+Namaste! 🙏

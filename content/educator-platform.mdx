@@ -1,0 +1,130 @@
+---
+title: "Educator Platform"
+publishedAt: "2024-07-15"
+updatedAt: "2026-08-09"
+author: "Sai Charan Kalla"
+summary: "Toddle educator platform case study covering assignment flow redesign, due dates, visibility rules, competitor analysis, data states, permissions, and high-fidelity designs."
+image: "/project-educator-platform.png"
+---
+
+export const withBasePath = (path) => ((process.env.GITHUB_PAGES === "true" ? "/" + (process.env.GITHUB_PAGES_REPOSITORY || "Myportfolio") : process.env.NEXT_PUBLIC_BASE_PATH) || "") + path;
+
+> Redesinging the assign flow in assignments module
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <img src={withBasePath("/case-studies/educator-platform/01-official-color.png")} alt="Educator Platform hero image" className="h-auto w-full" />
+</div>
+
+---
+
+## Introduction
+
+The assignments module in Toddle’s educator platform is one of the most frequently used. It lets teachers assign tasks, learning experiences, worksheets, and assessments. Currently, users can assign tasks, set submission deadlines, schedule when the assignment becomes visible to students, and close submissions after the due date. Teachers can also set specific times for these actions.
+
+## Identification of Problem
+
+### Inflexible assignment locking:
+
+Right now, assignments are automatically locked once the due date passes, with no option to set a different close date. This prevents late submissions, putting us at a disadvantage compared to competitors who allow extended deadlines.
+
+### Confusing user interface
+
+The current interface for scheduling and assigning tasks is not very intuitive, leading to teacher confusion. Due date and scheduled date fields lack clear context or explanations, making it hard for users to understand how these settings affect assignment management.
+
+### Limited control over assignment visibility
+
+At the moment, assignments can either be scheduled for future release or published immediately. However, a program-level setting controls visibility for all scheduled assignments, meaning that if it’s enabled, everything becomes visible to students. Teachers can’t choose to show some tasks while hiding others, like assessments. Many competitors offer more flexible options, allowing teachers to publish or unpublish individual assignments, which better supports different teaching approaches.
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <iframe title="Educator platform" src="https://embed.figma.com/board/0mpT2uj6KEQqrNRjIdxndH/Class-Stream-Task?node-id=90-542&amp;embed-host=share" className="h-[250px] w-full" allowFullScreen />
+</div>
+
+## User Goals
+
+Our goal is to improve the task assignment process by making due dates, schedule dates, and close dates easier to manage and understand. We’ll simplify the terms used and make it clearer for both students and teachers to track and handle assignments.
+
+## Competitors analysis
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <iframe title="Educator platform" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQT20zdY2Xc0BwAAzd-_VpxHoM37oC-u5F71aZx1R-hRp2be5kcZA9dhCPH0zZmkXr_FRMQV2s2XAZl/pubhtml?gid=0&amp;single=true&amp;widget=true&amp;headers=false" className="h-[350px] w-full" allowFullScreen />
+</div>
+
+## Competitors flow analysis
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <iframe title="Educator platform" src="https://embed.figma.com/board/0mpT2uj6KEQqrNRjIdxndH/Class-Stream-Task?node-id=62-2111&amp;embed-host=share" className="h-[450px] w-full" allowFullScreen />
+</div>
+
+## Observed patterns
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <img src={withBasePath("/case-studies/educator-platform/02-observed-patterns.png")} alt="user journey image" className="h-auto w-full" />
+</div>
+
+## Data analysis
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <iframe title="Educator platform" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTHV0gXDK6dk4FQRJ7y_0vHkGTw6veSbaVYEK9ee6MaypackIkRIz6zvWM-6FSj6zCIArl8EJMqS27A/pubhtml?gid=1282089469&amp;single=true&amp;widget=true&amp;headers=false" className="h-[450px] w-full" allowFullScreen />
+</div>
+
+## Data analysis across schools for determining outliers
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <iframe title="Educator platform" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTHV0gXDK6dk4FQRJ7y_0vHkGTw6veSbaVYEK9ee6MaypackIkRIz6zvWM-6FSj6zCIArl8EJMqS27A/pubhtml?gid=358300667&amp;single=true&amp;widget=true&amp;headers=false" className="h-[450px] w-full" allowFullScreen />
+</div>
+
+## User journey
+
+The assignment process is broken down into three phases: actions taken before the task is assigned, during the task, and after the task is completed.
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <iframe title="Educator platform" src="https://embed.figma.com/board/0mpT2uj6KEQqrNRjIdxndH/Class-Stream-Task?node-id=90-543&amp;embed-host=share" className="h-[450px] w-full" allowFullScreen />
+</div>
+
+## Data metrix for determining the states of the assignment
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <img src={withBasePath("/case-studies/educator-platform/03-data-matrix.png")} alt="Educator platform" className="h-auto w-full" />
+</div>
+
+## Available use case for visibility and submission
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <img src={withBasePath("/case-studies/educator-platform/04-usecases.png")} alt="Educator platform" className="h-auto w-full" />
+</div>
+
+## Permission configuration
+
+The assignments module is set up to handle past, present, and future tasks, which affects what students, parents, and teachers can see across the educator, student, and family platforms. To manage this, we needed to clearly define the visibility permissions.
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <img src={withBasePath("/case-studies/educator-platform/05-permission-configuration.png")} alt="Educator platform" className="h-auto w-full" />
+</div>
+
+## Time series analysis
+
+Once we set the visibility permissions, the next step was to define the time-based analysis. This included tracking assignments through three main states (“In drafts,” “Assigned,” “Completed”) across four phases: “Before the assignment start date,” “After the start date but before the due date,” “After the due date but before the close date,” and “After the close date.”
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <iframe title="Educator platform" src="https://embed.figma.com/board/0mpT2uj6KEQqrNRjIdxndH/Class-Stream-Task?node-id=97-3406&amp;embed-host=share" className="h-[450px] w-full" allowFullScreen />
+</div>
+
+## High Fidelity designs
+
+Here are the final high fidelity designs in the assignment flow for quick tasks, learning experiences, and assessments
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <iframe title="Educator platform" src="https://embed.figma.com/design/yLEnuihk0vrSNU9URupFzA/Class-Stream-Task---WIP?node-id=1017-18014&amp;embed-host=share" className="h-[450px] w-full" allowFullScreen />
+</div>
+
+Here are the final high fidelity designs in the assignment flow for work sheet
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <iframe title="Educator platform" src="https://embed.figma.com/design/yLEnuihk0vrSNU9URupFzA/Class-Stream-Task---WIP?node-id=1017-18014&amp;embed-host=share" className="h-[450px] w-full" allowFullScreen />
+</div>
+
+That's how the product workflow was built and handed off to the developers.
+
+Please 👏🏻 if you enjoyed this article. Feel free to get in touch with me at kc60488charan@gmail.com for any recommendations and suggestions.
+
+Namaste! 🙏

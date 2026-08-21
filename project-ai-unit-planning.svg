@@ -1,0 +1,44 @@
+<svg width="1376" height="768" viewBox="0 0 1376 768" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1376" height="768" rx="48" fill="#F7F8FA"/>
+  <rect x="82" y="72" width="1212" height="624" rx="36" fill="white" stroke="#E5E7EB" stroke-width="2"/>
+  <rect x="126" y="122" width="186" height="54" rx="27" fill="#FF5766"/>
+  <path d="M174 149C174 132.431 187.431 119 204 119H234C250.569 119 264 132.431 264 149C264 165.569 250.569 179 234 179H204C187.431 179 174 165.569 174 149Z" fill="white"/>
+  <path d="M217 135L236 149L217 163V135Z" fill="#FF5766"/>
+  <text x="342" y="160" font-family="Inter, Arial, sans-serif" font-size="44" font-weight="800" fill="#111827">AI Unit Planning</text>
+  <text x="342" y="204" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="500" fill="#6B7280">Unit template customization, unified fields, and AI-assisted planner creation</text>
+
+  <rect x="126" y="266" width="328" height="300" rx="28" fill="#111827"/>
+  <text x="166" y="328" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="800" fill="white">1. Field system</text>
+  <rect x="166" y="368" width="238" height="34" rx="17" fill="#374151"/>
+  <text x="186" y="391" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="700" fill="#F9FAFB">Rich text</text>
+  <rect x="166" y="420" width="188" height="34" rx="17" fill="#374151"/>
+  <text x="186" y="443" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="700" fill="#F9FAFB">Checklist</text>
+  <rect x="166" y="472" width="218" height="34" rx="17" fill="#374151"/>
+  <text x="186" y="495" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="700" fill="#F9FAFB">Nested checklist</text>
+
+  <rect x="524" y="266" width="328" height="300" rx="28" fill="#FFF1F2" stroke="#FFE1E5" stroke-width="2"/>
+  <text x="564" y="328" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="800" fill="#111827">2. Template UI</text>
+  <rect x="564" y="366" width="220" height="36" rx="18" fill="white" stroke="#FFB7C0" stroke-width="2"/>
+  <text x="586" y="390" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="700" fill="#111827">Dataset mapping</text>
+  <rect x="564" y="424" width="186" height="36" rx="18" fill="white" stroke="#FFB7C0" stroke-width="2"/>
+  <text x="586" y="448" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="700" fill="#111827">Global settings</text>
+  <rect x="564" y="482" width="232" height="36" rx="18" fill="white" stroke="#FFB7C0" stroke-width="2"/>
+  <text x="586" y="506" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="700" fill="#111827">Dependency mapping</text>
+
+  <rect x="922" y="266" width="328" height="300" rx="28" fill="#ECFDF5" stroke="#BBF7D0" stroke-width="2"/>
+  <text x="962" y="328" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="800" fill="#111827">3. AI workflow</text>
+  <circle cx="996" cy="388" r="17" fill="#10B981"/>
+  <path d="M987 388L994 395L1006 381" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="1030" y="396" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="700" fill="#111827">Minimum inputs</text>
+  <circle cx="996" cy="448" r="17" fill="#10B981"/>
+  <path d="M987 448L994 455L1006 441" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="1030" y="456" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="700" fill="#111827">Generate unit outline</text>
+  <circle cx="996" cy="508" r="17" fill="#10B981"/>
+  <path d="M987 508L994 515L1006 501" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="1030" y="516" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="700" fill="#111827">Review and refine</text>
+
+  <path d="M454 416H524" stroke="#D1D5DB" stroke-width="6" stroke-linecap="round"/>
+  <path d="M852 416H922" stroke="#D1D5DB" stroke-width="6" stroke-linecap="round"/>
+  <path d="M504 399L524 416L504 433" stroke="#D1D5DB" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M902 399L922 416L902 433" stroke="#D1D5DB" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

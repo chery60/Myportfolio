@@ -1,0 +1,32 @@
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+export function withBasePath(path?: string) {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
+  if (
+    !path ||
+    !path.startsWith("/") ||
+    path.startsWith("//") ||
+    basePath === ""
+  ) {
+    return path;
+  }
+
+  return `${basePath}${path}`;
+}
+
+export function formatDate(date: string | Date) {
+  // Use UTC to ensure consistent formatting between server and client
+  const dateObj = typeof date === "string" ? new Date(date) : date;
+  return dateObj.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+}

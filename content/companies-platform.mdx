@@ -1,0 +1,113 @@
+---
+title: "Companies Platform"
+publishedAt: "2023-08-15"
+updatedAt: "2026-08-09"
+author: "Sai Charan Kalla"
+summary: "Information architecture case study for Recur Club companies platform, covering research, product analytics, UX review, navigation restructuring, and final designs."
+image: "/project-companies-platform.png"
+---
+
+export const withBasePath = (path) => ((process.env.GITHUB_PAGES === "true" ? "/" + (process.env.GITHUB_PAGES_REPOSITORY || "Myportfolio") : process.env.NEXT_PUBLIC_BASE_PATH) || "") + path;
+
+> Creating clear information architecture for easier user navigation in the companies platform
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <img src={withBasePath("/case-studies/companies-platform/01-recurplatform.png")} alt="Companies Platform hero image" className="h-auto w-full" />
+</div>
+
+---
+
+## Introduction
+
+Recur Club is a financial platform that provides hassle-free financing for startups. It offers a variety of benefits, including:
+
+Quick and easy access to capital: Recur Club can provide startups with the capital they need to grow and succeed, quickly and easily.<br />
+Flexible repayment options: Recur Club offers flexible repayment options that are tailored to the needs of each startup.<br />
+No collateral required: Recur Club does not require any collateral, making it a good option for startups with limited assets.Expert support: Recur Club provides expert support to startups throughout the financing process.
+
+## Back Story
+
+The company product is one of the products among the investors portal, admin, and insights products which was taking shape after 1 year of operations. Initially, the customer success team and business developments used to handle the startup that came for debt financing. But as the company was approached by a huge number of startups than companies in onboarding was getting very difficult to handle so a project was taken up to build a seamless product experience for the two personas one was the founder and the other was the finance manager's persona.
+
+## Problem Identification
+
+At first, I understood the initial workflow of all the modules and built the entire information architecture so that I could use that to frame my user interview questions. I have gone through the Hotjar recordings on each module and listed
+
+All the findings and the pain points of the user.Dropoff of users on each pageAverage time spent by a user on each page.Understood the user paths to complete one task.Through heatmap understand the user behavior with the product.
+
+I have used the Mixpanel tool to understand the user behavior like after signup when the user came back. Conducted the dropoff analysis in each workflow.
+
+## User persona
+
+User personas visiting the product in different phases of the entire journey of raising debt capital and followed by repayments —
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <img src={withBasePath("/case-studies/companies-platform/02-recur-img1.jpg")} alt="Companies platform" className="h-auto w-full" />
+</div>
+
+### Task level visits on each phase of the application process by each persona.
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <img src={withBasePath("/case-studies/companies-platform/03-recur-img2.jpg")} alt="Companies platform" className="h-auto w-full" />
+</div>
+
+### Dropoff Analysis of the Product.
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <img src={withBasePath("/case-studies/companies-platform/04-recur-img3.jpg")} alt="Companies platform" className="h-auto w-full" />
+</div>
+
+## Using Qualitative Methods
+
+There was a process set by the organization to talk to companies regularly and take timely feedback on the product's journey<br />
+After going through the hot jar recording and the mix panel user flow analysis I have made a couple of questions as a list of questions to be asked along with understanding the user pain points.
+
+## Example of list of questions
+
+Understanding the signup process.<br />
+Where do get all the required files to complete the onboarding?<br />
+How do they add the finance manager to complete the onboarding process?<br />
+What time does it take to get all those files?<br />
+What are the tasks that people are doing after post-listing?<br />
+How they are making Repayments?<br />
+Why do they use payments and payouts? and how frequently<br />
+What do people do in the collections module?<br />
+How do they make financial reports using our product?<br />
+How they are tracking their repayments? etc<br />
+Conducted User interviews and found all the pain points and understood their expectations.
+
+## Conducted the UX review
+
+After understanding the current user behavior and all the pain points. i have done a UX review on all the pages by using Jakob Nielsen's heuristics
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <iframe title="Companies platform" src="https://www.figma.com/embed?embed_host=share&amp;url=https%3A%2F%2Fwww.figma.com%2Fdesign%2FiaWsezudd8M9zrCVE7tCN2%2FDesign-Review%3Fnode-id%3D0-1%26t%3DalZQ82SqG9ReIRos-1" className="h-[450px] w-full" allowFullScreen />
+</div>
+
+## Restructured the information architecture
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <iframe title="Companies platform" src="https://www.figma.com/embed?embed_host=share&amp;url=https%3A%2F%2Fwww.figma.com%2Fdesign%2FiaWsezudd8M9zrCVE7tCN2%2FDesign-Review%3Fnode-id%3D1207-20%26t%3DalZQ82SqG9ReIRos-1" className="h-[450px] w-full" allowFullScreen />
+</div>
+
+## After all the findings, build the visual design for the new navigational flow
+
+After restructuring the product, the number of queries was reduced, and we received positive feedback from customers. We started working on new feature requests and process standardization.
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <video controls className="h-auto w-full">
+    <source src={withBasePath("/case-studies/companies-platform/05-recur.webm")} type="video/webm" />
+  </video>
+</div>
+
+## Companies portal navigation
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <video controls className="h-auto w-full">
+    <source src={withBasePath("/case-studies/companies-platform/06-recur-companies.webm")} type="video/webm" />
+  </video>
+</div>
+
+Please 👏🏻 if you enjoyed this article. Feel free to get in touch with me at kc60488charan@gmail.com for any recommendations and suggestions.
+
+Namaste! 🙏

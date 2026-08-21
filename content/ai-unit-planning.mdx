@@ -1,0 +1,200 @@
+---
+title: "AI Unit Planning"
+publishedAt: "2024-08-20"
+updatedAt: "2026-08-11"
+author: "Sai Charan Kalla"
+summary: "Toddle case study on unit template customization, unified planner fields, dataset mapping, and early AI-assisted unit creation workflows for curriculum planning."
+image: "/project-ai-unit-planning.png"
+---
+
+export const withBasePath = (path) => ((process.env.GITHUB_PAGES === "true" ? "/" + (process.env.GITHUB_PAGES_REPOSITORY || "Myportfolio") : process.env.NEXT_PUBLIC_BASE_PATH) || "") + path;
+
+> Building a more flexible unit planning system for curriculum templates, custom datasets, and AI-assisted planner creation.
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <img src={withBasePath("/project-ai-unit-planning.png")} alt="AI Unit Planning project visual" className="h-auto w-full" />
+</div>
+
+---
+
+## Introduction
+
+At Toddle, unit planning sits at the center of how schools plan curriculum across programs like PYP, MYP, DP, and UbD. Each curriculum has its own unit templates. Each template is made of fields, and those fields can either be dataset-driven or custom-created by the school.
+
+The dataset-driven fields had three important dataset types: card datasets, checklist datasets, and nested checklist datasets. Whenever an admin created a card, checklist, or nested checklist field, it needed to be tagged to a dataset of the same type. That dataset then powered the options teachers used inside the unit planner.
+
+My work on this project was split into three phases: unifying the existing planner fields, redesigning the unit template customization experience, and exploring how AI could help teachers generate meaningful customized unit planners.
+
+## How I Framed The Work
+
+I started the project by writing a working cover note in Coda so everyone could understand why this work mattered before getting into the tables. The core problem was simple: teachers spend a lot of time planning units that need to align with different curriculum structures. When the planning flow is inconsistent or hard to configure, it creates extra work for teachers and makes it harder for schools to maintain curriculum quality.
+
+The first users I considered were teachers, students, and families. Teachers need to create and deliver strong unit plans. Students need a clear learning path. Families need enough visibility to understand what their child is learning and how they can support them.
+
+From there, I translated the work into four use cases:
+
+| User | Need | Design question |
+| --- | --- | --- |
+| Teacher creating a unit | Generate unit plans quickly so they can spend more time teaching. | How might we help teachers generate curriculum-aligned unit plans using AI? |
+| Teacher collaborating with colleagues | Co-create and refine unit plans with shared best practices. | How might AI support collaboration without removing teacher ownership? |
+| Student using a unit plan | Understand the learning path and stay engaged. | How might unit plans become easier for students to access and follow? |
+| Family viewing curriculum | See enough curriculum context to support learning at home. | How might families get useful visibility without adding admin work for teachers? |
+
+This framing helped me keep the project sequential: first understand the system, then simplify the components, then redesign customization, and only then decide where AI should enter the workflow.
+
+## Problem
+
+The unit planning system had grown across multiple curricula, template types, and component patterns. Similar fields were implemented in different ways, which made maintenance difficult and created inconsistencies between templates.
+
+At the same time, Toddle was moving toward a more flexible single-page unit planner. That meant the admin-side customization experience also needed to evolve. Schools needed a clearer way to configure fields, connect them to datasets, understand dependencies, and decide which parts of a unit planner should be fixed, editable, duplicated, or AI-assisted.
+
+The AI workflow added another layer of complexity: before generating a useful unit plan, we first had to understand which fields were required, which were optional, and what minimum context an AI system needed to produce a meaningful output.
+
+## Coda References I Used
+
+I used Coda as the working space for breaking down the product problem. The most useful references were not just screenshots; they were tables that helped me compare templates, fields, datasets, and AI feasibility.
+
+| Coda reference | What I used it for | How it shaped the product direction |
+| --- | --- | --- |
+| Problem statement and use cases | Defined the teacher, student, and family needs before designing AI. | Kept the project focused on planning quality, not just AI generation. |
+| Project Pipeline | Tracked AI unit creation tasks by status, month, week, and planning step. | Helped split the AI work into unit outline generation, editing actions, entry points, template coverage, and impacted areas. |
+| Template-wise fields | Compared PYP, MYP, DP, and UbD planner fields. | Helped identify repeated field patterns that could be unified. |
+| UI Analysis | Compared fields by importance, AI input requirement, AI feasibility, required parameters, and output format. | Helped decide which fields were required for AI and which could be optional. |
+| UI Explanation | Mapped current field components to the new input UI. | Became the base for the unified field component model. |
+| Admin dataset changes | Mapped curriculum-specific items into card, checklist, nested checklist, and dependent dataset types. | Helped define how admin datasets should power template fields. |
+| Discussion points | Captured product decisions around editable templates, official datasets, dependencies, bulk upload, and migration risk. | Turned open questions into scope boundaries for the first version. |
+| AI agents in LMS | Explored where AI agents could support content, students, assessment, admin work, and personalization. | Kept the unit-planning AI workflow connected to the broader LMS direction. |
+
+## Phase 1: Unifying Unit Planner Fields
+
+I started by auditing the fields used across curriculum planners and mapping them into a smaller unified component system. The goal was to reduce multiple one-off implementations into a consistent field model that could work across unit templates.
+
+The unified field model included common inputs like rich text, text area, single-line text, list, reflection box, card, checklist, and nested checklist fields. Dataset-backed fields were treated separately from free custom fields because they required stronger rules around tagging, data structure, dependencies, and reuse.
+
+This phase also helped clarify which fields could support AI generation. For example, unit title, theme, and central idea could become required or high-signal inputs, while fields like cover images could be generated later as supporting content. The field audit became the foundation for deciding what AI could generate, what teachers should control manually, and what information was required before the system could create a useful planner.
+
+### Field audit references
+
+In the template-wise field tables, I compared planner fields across curricula. For example, in the MYP subject-specific planner, fields like approaches to learning, summative assessment, content, subject standards, learning experiences, formative assessment, differentiation, service learning, and description appeared with input types such as rich text editor, checkbox in modal, selection card, and checkbox on page.
+
+The DP table helped me separate creation-time fields from after-creation fields. Basic details like unit title, cover image, unit dates, unit duration, subjects, levels, unit description, and final assessments needed to be understood differently from fields that teachers edit later inside the planner.
+
+The `UI Analysis` table then made the AI question more concrete:
+
+| Field | Why it mattered | AI requirement | AI feasibility | Minimum context |
+| --- | --- | --- | --- | --- |
+| Unit title | Provides a clear focus for the unit. | Required | Yes | Central idea, with subject and theme as helpful add-ons. |
+| Cover image | Adds a visual connection to the unit. | Not required | Yes | Central idea, with subject and theme as helpful add-ons. |
+
+This is where I started separating "fields needed to create a meaningful unit" from "fields that can make the generated unit richer later."
+
+## Phase 2: Revamping Unit Template Customization
+
+After the field system was clearer, I redesigned the unit template customization UI to support the new single-page unit planner direction. The admin experience needed to help users configure datasets, add fields to templates, and understand how those fields would appear in the planner.
+
+The redesign introduced clearer thinking around:
+
+- Global dataset settings, such as where a dataset can be used, who can see it, and whether it applies at subject or grade level.
+- Component-level mapping, so each dataset type could map cleanly to the correct planner field.
+- Dependency mapping, so fields like related concepts could depend on parent entities such as subjects or key concepts.
+- Curriculum-specific template mapping across PYP, MYP, DP, and UbD planners.
+
+### Design preview
+
+The Figma exploration covered the admin-side customization surface, including visibility settings, default display settings, bulk apply behavior, tab interactions, nested checklist UI, reordering, adding sections and subsections, and hiding fields.
+
+<div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
+  <iframe title="Unit template customization Figma preview" src="https://www.figma.com/embed?embed_host=share&amp;url=https%3A%2F%2Fwww.figma.com%2Fdesign%2FmmW9jqencHdKNxpsdLVuJK%2FUnit-template-customization%3Fnode-id%3D0-1" className="h-[520px] w-full" allowFullScreen />
+</div>
+
+For PYP, this included mapping fields like learner profile attributes, approaches to learning, actions, concepts, related concepts, themes, and theme descriptors into the right dataset types. Some became card datasets, some became checklists, and some required nested or dependent behavior.
+
+The work also raised important product decisions: whether Toddle-defined templates should be editable, whether official datasets should be duplicated instead of modified, how bulk upload should work, and how changing a dataset type would affect older units that already used that field.
+
+### Dataset mapping references
+
+The admin dataset table helped me make the configuration model practical. Instead of treating every curriculum item as a custom field, I mapped the items into dataset types that could be reused and maintained.
+
+| Curriculum item | Recommended dataset | Notes from the mapping |
+| --- | --- | --- |
+| Learner profile attributes | Card dataset | Admin should select the card dataset. |
+| Approaches to learning | Nested checklist dataset | Parent rows inherit appended grade and subject values from child rows. |
+| Actions | Checklist dataset | Checklist with textbox enabled. |
+| Concepts | Checklist dataset | Checklist with textbox enabled. |
+| Related concepts by subject | Dropdown dataset | Dependent dropdown with dependency on subjects. |
+
+I also listed the curriculum-specific items that needed admin treatment:
+
+| Curriculum | Items reviewed |
+| --- | --- |
+| PYP | Learner profile attributes, approaches to learning, actions, concepts, related concepts by subject, related concepts by concept, theme, and theme descriptors. |
+| MYP | Purpose of integration, key concepts, related concepts, global context, MYP objectives, learner profile attributes, and approaches to learning. |
+| DP | Aims and objectives, syllabus content, learner profile attributes, approaches to learning, metacognitive approaches, differentiation approaches, language and learning connections, TOK connections, and CAS strands. |
+
+The `UI Explanation` table then connected this backend model to the actual customization UI. Rich text editor, text area, single-line text, list, reflection box, card, and checklist became the core set. Card and checklist fields needed additional configuration like title, subtext, icon or image, info tooltip, single-select or multi-select behavior, grades, subjects, and optional "add another" behavior.
+
+For dependency mapping, I split dependencies into global-level entities, like unit type and subjects, and module-level entities, like key concepts. This mattered because some fields should not be added to a template unless their parent field exists. For example, related concepts should not appear unless key concepts are part of the unit template.
+
+### Decision log references
+
+The discussion table became a decision log. A few examples shaped the UX:
+
+| Question | Direction |
+| --- | --- |
+| Should non-configurable datasets like PYP themes and descriptors appear on the admin side? | Show them in the dataset module with limited customization, such as renaming or duplicating Toddle-defined datasets. |
+| Should Toddle-defined templates be editable? | Keep them protected, but explore partial edits like name, secondary text, and help text. |
+| Should Toddle-defined datasets be editable? | Do not fully edit them; duplication is safer because official curriculum datasets may change later. |
+| Should teachers add dataset items? | Not in the first version because school-level additions create district-level governance questions. |
+| Should dependent datasets be supported? | Not in this version, but the model should leave room for dependent dropdowns, cards, and checklists later. |
+| Should dataset UI type be interchangeable? | Treat carefully because changing a dataset type can affect older units that already use it. |
+
+## Phase 3: Designing The AI Unit Creation Workflow
+
+The third phase explored how teachers could use AI to generate customized unit planners. I looked at three possible approaches.
+
+The first approach generated the entire unit from a small set of primary questions, then let the teacher update, modify, or regenerate the output. This was simpler, but it worked best for shorter flows with less complex data.
+
+The second approach generated an initial output step by step. Teachers could review and iterate at each stage, and the output of one step could become the input for the next. This matched complex planning flows where each planning decision affects later fields.
+
+The third approach kept fields empty by default and let teachers decide whether each section should be generated with AI or completed manually. This gave teachers more control, but required a clearer interaction model and stronger field-level decisions.
+
+The project pipeline included generating the unit flow or outline, modifying the output with add, remove, and update actions, adding new sections with AI, understanding the impact on learning experiences and worksheets, defining the entry point for AI unit creation, and extending AI support into IB templates and custom unit templates.
+
+### AI workflow references
+
+The project pipeline table helped me organize the AI work as a sequence instead of a single feature.
+
+| Pipeline task | Status in my planning table | Step |
+| --- | --- | --- |
+| Generating entire unit flow using AI | In progress, Aug 2024 Week 3 | AI generated unit flow or outline |
+| Modifying unit flow using AI with add, remove, and update functions | Not started, Aug 2024 Week 4 | AI generated unit flow or outline |
+| Adding new sections with AI and regenerating unit flow | Not started, Aug 2024 Week 4 | AI generated unit flow or outline |
+| Categorising fields as mandatory or optional and testing with GPT | In progress, Aug 2024 Week 2 | Field analysis |
+| Defining the entry point for AI unit creation | Not started | Creation of unit |
+| Creation experience or first-time experience of AI unit | In progress | Creation of unit |
+| Incorporating AI in custom fields and custom templates | Not started | Custom templates |
+| Creation experience or first-time experience of AI course unit | In progress, Aug 2024 Week 2 | Creation of course |
+
+This table helped me see that the real design problem was not just "generate a unit." It was deciding the right entry point, the right minimum inputs, how teachers could modify the generated output, and how AI would affect adjacent flows like learning experiences, worksheets, reflections, evidence, sharing, and custom templates.
+
+## AI Agents In The LMS Context
+
+I also explored where AI agents could fit in the broader LMS experience. The LMS use cases included content organization, content quality checks, material summaries, supplementary resources, student support, assessment analytics, administrative tasks, and personalization.
+
+For unit planning, the key question was not just "Can AI generate content?" It was "What context does AI need, where should the teacher stay in control, and how do we keep the generated planner aligned with the curriculum template?"
+
+That shifted the design work away from a single AI button and toward a structured planning assistant: one that understands field types, curriculum rules, dependencies, and teacher intent.
+
+The broader LMS agent reference helped me think beyond the unit planner. AI could support automated content organization, quality recommendations, summaries, supplementary materials, translation, gap identification, personalized tutoring, custom practice generation, feedback, progress analysis, reminders, and adaptive learning paths. I used that as a boundary check: unit planning AI should feel like part of a larger learning workflow, not a disconnected generator.
+
+## Outcome
+
+The project gave the team a clearer model for unit planner fields, dataset-backed components, template customization, and AI-assisted creation. It connected the admin-side customization work with the teacher-side planning workflow, so the system could support both flexible templates and future AI generation.
+
+My contribution covered field audits, component convergence, dataset and dependency mapping, customization UX redesign, AI workflow exploration, and defining the minimum field information needed to generate meaningful unit planners.
+
+## What I Learned
+
+This project taught me that AI workflows depend heavily on information architecture. Before AI can generate useful output, the product needs a strong model of fields, dependencies, permissions, required inputs, optional context, and user control.
+
+The most valuable design work was not just designing the AI interaction. It was simplifying the underlying planning system so AI could become a natural extension of the workflow instead of a separate layer on top.
