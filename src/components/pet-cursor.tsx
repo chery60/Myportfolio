@@ -11,6 +11,7 @@ import {
   getPetById,
   PetArtwork,
   type MovementType,
+  type PetId,
 } from "@/components/pet-artwork";
 import { useSelectedPet } from "@/components/use-selected-pet";
 
@@ -61,6 +62,13 @@ const FLIGHT_ARRIVAL_THRESHOLD = 14;
 const FLIGHT_IDLE_DELAY_MS = 110;
 const LANDING_DURATION_MS = 190;
 const MAX_PARTICLES = 28;
+const DEPTH_FLIGHT_EXCLUDED_PETS = new Set<PetId>([
+  "among-us",
+  "blues",
+  "melody",
+  "willow",
+  "hatchlings",
+]);
 
 function createIdleFlightState(phase: FlightPhase = "idle"): FlightState {
   return {
@@ -189,7 +197,10 @@ export default function PetCursor() {
   const reducedMotionRef = useRef(false);
   const selectedPet = useSelectedPet();
   const movementType = getPetById(selectedPet).movementType;
+  const selectedPetRef = useRef<PetId>(selectedPet);
   const movementTypeRef = useRef<MovementType>(movementType);
+  const usesDepthFlight =
+    movementType === "fly" && !DEPTH_FLIGHT_EXCLUDED_PETS.has(selectedPet);
   const [isEnabled, setIsEnabled] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isMoving, setIsMoving] = useState(false);
@@ -210,8 +221,9 @@ export default function PetCursor() {
   }, []);
 
   useEffect(() => {
+    selectedPetRef.current = selectedPet;
     movementTypeRef.current = movementType;
-  }, [movementType]);
+  }, [movementType, selectedPet]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia(DESKTOP_POINTER_QUERY);
@@ -286,6 +298,10 @@ export default function PetCursor() {
         })`;
       }
     };
+
+    const isDepthFlightEnabled = () =>
+      movementTypeRef.current === "fly" &&
+      !DEPTH_FLIGHT_EXCLUDED_PETS.has(selectedPetRef.current);
 
     const publishParticles = (nextParticles: FlightParticle[]) => {
       const cappedParticles = nextParticles.slice(-MAX_PARTICLES);
@@ -364,18 +380,36 @@ export default function PetCursor() {
       const direction = dx < 0 ? -1 : 1;
       const pulse = Math.max(Math.sin(time / 76), 0);
       const wobble = Math.sin(time / 110) * 2.4 * direction;
+      const depthEnabled = isDepthFlightEnabled();
 
-      birdImageRef.current.style.transform = `translateY(${(
-        -2 -
-        pulse * 2
-      ).toFixed(2)}px) rotate(${wobble.toFixed(2)}deg) scale(${(
-        1 +
-        pulse * 0.025
-      ).toFixed(3)}, ${(1 - pulse * 0.035).toFixed(3)})`;
+      birdImageRef.current.style.transform = depthEnabled
+        ? `perspective(320px) translate3d(0, ${(
+            -2 -
+            pulse * 2
+          ).toFixed(2)}px, ${(7 + pulse * 8).toFixed(2)}px) rotateX(${(
+            -3 -
+            pulse * 2
+          ).toFixed(2)}deg) rotateY(${(direction * (5 + pulse * 4)).toFixed(
+            2
+          )}deg) rotateZ(${wobble.toFixed(2)}deg) scale3d(${(
+            1 +
+            pulse * 0.028
+          ).toFixed(3)}, ${(1 - pulse * 0.038).toFixed(3)}, 1)`
+        : `translateY(${(-2 - pulse * 2).toFixed(2)}px) rotate(${wobble.toFixed(
+            2
+          )}deg) scale(${(1 + pulse * 0.025).toFixed(3)}, ${(
+            1 -
+            pulse * 0.035
+          ).toFixed(3)})`;
+      birdImageRef.current.style.filter = depthEnabled
+        ? "drop-shadow(0 12px 12px rgba(15,23,42,0.18)) saturate(1.06) contrast(1.03)"
+        : "";
       birdShadowRef.current.style.transform = `translateX(-50%) scale(${(
-        1 +
-        pulse * 0.045
-      ).toFixed(3)}, ${(1 - pulse * 0.06).toFixed(3)})`;
+        (depthEnabled ? 1.06 : 1) +
+        pulse * (depthEnabled ? 0.07 : 0.045)
+      ).toFixed(3)}, ${(1 - pulse * (depthEnabled ? 0.08 : 0.06)).toFixed(
+        3
+      )})`;
       birdShadowRef.current.style.opacity = "0.9";
     };
 
@@ -406,13 +440,35 @@ export default function PetCursor() {
         Math.sin(progress * Math.PI) * Math.min(flight.arcHeight * 0.1, 16);
       const scaleX = 1 + launchSquash * 0.12 - settleStretch * 0.04;
       const scaleY = 1 - launchSquash * 0.09 + settleStretch * 0.03;
-      const shadowScale = 1 - Math.sin(progress * Math.PI) * 0.3;
+      const flightLift = Math.sin(progress * Math.PI);
+      const shadowScale = 1 - flightLift * 0.3;
+      const depthEnabled = isDepthFlightEnabled();
 
-      birdImageRef.current.style.transform = `translateY(${-liftAmount.toFixed(
-        2
-      )}px) rotate(${tilt.toFixed(2)}deg) scale(${scaleX.toFixed(
-        3
-      )}, ${scaleY.toFixed(3)})`;
+      birdImageRef.current.style.transform = depthEnabled
+        ? `perspective(340px) translate3d(0, ${-liftAmount.toFixed(
+            2
+          )}px, ${(8 + flightLift * 24).toFixed(2)}px) rotateX(${clamp(
+            -flightLift * 13 - mirroredAngle * 0.12,
+            -18,
+            10
+          ).toFixed(2)}deg) rotateY(${(
+            flight.direction *
+            (9 + flightLift * 13)
+          ).toFixed(2)}deg) rotateZ(${tilt.toFixed(
+            2
+          )}deg) scale3d(${scaleX.toFixed(3)}, ${scaleY.toFixed(3)}, 1)`
+        : `translateY(${-liftAmount.toFixed(2)}px) rotate(${tilt.toFixed(
+            2
+          )}deg) scale(${scaleX.toFixed(3)}, ${scaleY.toFixed(3)})`;
+      birdImageRef.current.style.filter = depthEnabled
+        ? `drop-shadow(0 ${(13 + flightLift * 10).toFixed(
+            1
+          )}px ${(12 + flightLift * 14).toFixed(
+            1
+          )}px rgba(15,23,42,${(0.2 - flightLift * 0.06).toFixed(
+            2
+          )})) saturate(1.08) contrast(1.04)`
+        : "";
       birdShadowRef.current.style.transform = `translateX(-50%) scale(${shadowScale.toFixed(
         3
       )})`;
@@ -428,13 +484,23 @@ export default function PetCursor() {
 
       const bounce = Math.sin(progress * Math.PI) * 5;
       const squash = Math.sin(progress * Math.PI) * 0.08;
+      const depthEnabled = isDepthFlightEnabled();
 
-      birdImageRef.current.style.transform = `translateY(${-bounce.toFixed(
-        2
-      )}px) scale(${(1 + squash).toFixed(3)}, ${(
-        1 -
-        squash * 0.75
-      ).toFixed(3)})`;
+      birdImageRef.current.style.transform = depthEnabled
+        ? `perspective(320px) translate3d(0, ${-bounce.toFixed(
+            2
+          )}px, ${(4 + squash * 55).toFixed(2)}px) rotateX(${(
+            -squash * 42
+          ).toFixed(2)}deg) scale3d(${(1 + squash).toFixed(3)}, ${(
+            1 -
+            squash * 0.75
+          ).toFixed(3)}, 1)`
+        : `translateY(${-bounce.toFixed(2)}px) scale(${(1 + squash).toFixed(
+            3
+          )}, ${(1 - squash * 0.75).toFixed(3)})`;
+      birdImageRef.current.style.filter = depthEnabled
+        ? "drop-shadow(0 12px 12px rgba(15,23,42,0.18)) saturate(1.06) contrast(1.03)"
+        : "";
       birdShadowRef.current.style.transform = `translateX(-50%) scale(${(
         1 +
         squash * 0.75
@@ -445,6 +511,7 @@ export default function PetCursor() {
     const resetFlightVisual = () => {
       if (birdImageRef.current) {
         birdImageRef.current.style.transform = "";
+        birdImageRef.current.style.filter = "";
       }
       if (birdShadowRef.current) {
         birdShadowRef.current.style.transform = "translateX(-50%)";
@@ -753,6 +820,7 @@ export default function PetCursor() {
         data-flight-phase={flightPhase}
         data-walking={movementType === "walk" && isMoving}
         data-flying={movementType === "fly" && isMoving}
+        data-depth-flight={usesDepthFlight}
         className="fixed left-0 top-0 z-20 h-[76px] w-[76px] -ml-[38px] -mt-[76px] pointer-events-none select-none transition-opacity duration-150 will-change-transform"
         style={{
           opacity: isVisible ? 1 : 0,
