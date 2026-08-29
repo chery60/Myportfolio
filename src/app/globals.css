@@ -91,6 +91,40 @@
   }
 }
 
+@keyframes petFlightSmoke {
+  0% {
+    opacity: 0.72;
+    transform: translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(0.42);
+  }
+
+  100% {
+    opacity: 0;
+    transform:
+      translate3d(-50%, -50%, 0)
+      translate3d(var(--pet-dx), var(--pet-dy), 0)
+      scale(var(--pet-scale));
+  }
+}
+
+@keyframes petFlightStreak {
+  0% {
+    opacity: 0.8;
+    transform:
+      translate3d(-50%, -50%, 0)
+      translate3d(0, 0, 0)
+      rotate(var(--pet-angle, 0deg))
+      scaleX(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform:
+      translate3d(-50%, -50%, 0)
+      translate3d(var(--pet-dx), var(--pet-dy), 0)
+      rotate(var(--pet-angle, 0deg)) scaleX(0.2);
+  }
+}
+
 .animate-pet-foot-left {
   animation: petFootLeft 0.25s infinite linear;
 }
@@ -106,7 +140,8 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-pet-foot-left,
   .animate-pet-foot-right,
-  .animate-pet-bob {
+  .animate-pet-bob,
+  [data-flight-particle] {
     animation: none;
   }
 }
