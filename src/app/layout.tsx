@@ -1,5 +1,5 @@
 import Navbar from "@/components/navbar";
-import AmongUsCursor from "@/components/among-us-cursor";
+import PetCursor from "@/components/pet-cursor";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { DATA } from "@/data/resume";
@@ -88,7 +88,7 @@ export default function RootLayout({
             <div className="relative z-10 max-w-2xl mx-auto py-12 pb-24 sm:py-24 px-6">
               {children}
             </div>
-            <AmongUsCursor />
+            <PetCursor />
             <Navbar />
           </TooltipProvider>
         </ThemeProvider>

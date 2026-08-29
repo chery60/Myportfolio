@@ -1,14 +1,18 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  PetArtwork,
+} from "@/components/pet-artwork";
+import { useSelectedPet } from "@/components/use-selected-pet";
 
 type Point = {
   x: number;
   y: number;
 };
 
-const DESKTOP_POINTER_QUERY = "(any-hover: hover) and (any-pointer: fine)";
-const CHARACTER_COLOR = "#7170ff";
+const DESKTOP_POINTER_QUERY =
+  "(min-width: 640px) and (any-hover: hover) and (any-pointer: fine)";
 const POINTER_OFFSET_Y = 24;
 const WALKING_HOLD_MS = 280;
 const MAX_SPEED = 7;
@@ -21,12 +25,12 @@ function clampTarget({ x, y }: Point): Point {
   }
 
   return {
-    x: Math.min(Math.max(x, 24), window.innerWidth - 24),
-    y: Math.min(Math.max(y, 54), window.innerHeight - 68),
+    x: Math.min(Math.max(x, 30), window.innerWidth - 30),
+    y: Math.min(Math.max(y, 58), window.innerHeight - 74),
   };
 }
 
-export default function AmongUsCursor() {
+export default function PetCursor() {
   const characterRef = useRef<HTMLDivElement>(null);
   const spriteRef = useRef<HTMLDivElement>(null);
   const targetRef = useRef<Point>({ x: 120, y: 120 });
@@ -40,6 +44,7 @@ export default function AmongUsCursor() {
   const [isEnabled, setIsEnabled] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isWalking, setIsWalking] = useState(false);
+  const selectedPet = useSelectedPet();
 
   const setWalking = useCallback((nextWalking: boolean) => {
     if (walkingRef.current === nextWalking) {
@@ -88,6 +93,7 @@ export default function AmongUsCursor() {
       } else if (dx > 0.5) {
         facingLeftRef.current = false;
       }
+
       if (spriteRef.current) {
         spriteRef.current.style.transform = `scaleX(${
           facingLeftRef.current ? -1 : 1
@@ -215,175 +221,17 @@ export default function AmongUsCursor() {
     <div
       ref={characterRef}
       aria-hidden="true"
-      data-among-us-cursor
+      data-pet-cursor
+      data-selected-pet={selectedPet}
       data-walking={isWalking}
-      className="fixed left-0 top-0 z-20 h-[44px] w-[36px] -ml-[18px] -mt-[44px] pointer-events-none select-none transition-opacity duration-150 will-change-transform"
+      className="fixed left-0 top-0 z-20 h-[58px] w-[58px] -ml-[29px] -mt-[58px] pointer-events-none select-none transition-opacity duration-150 will-change-transform"
       style={{
         opacity: isVisible ? 1 : 0,
         transform: "translate3d(120px, 120px, 0)",
       }}
     >
       <div ref={spriteRef} style={{ transform: "scaleX(1)" }}>
-        <div
-          className={isWalking ? "animate-amongus-bob" : undefined}
-          style={{ position: "relative", width: "36px", height: "44px" }}
-        >
-          <div
-            className="absolute bottom-[-4px] left-1/2 -translate-x-1/2 rounded-full"
-            style={{
-              width: "32px",
-              height: "8px",
-              background: "rgba(0,0,0,0.15)",
-            }}
-          />
-
-          <div
-            className="absolute"
-            style={{
-              top: "10px",
-              left: "-6px",
-              width: "14px",
-              height: "22px",
-              borderRadius: "6px",
-              background: CHARACTER_COLOR,
-              filter:
-                "drop-shadow(2px 0 0 #111) drop-shadow(-2px 0 0 #111) drop-shadow(0 2px 0 #111) drop-shadow(0 -2px 0 #111)",
-            }}
-          >
-            <div
-              className="absolute bottom-0 left-0 right-0"
-              style={{
-                height: "11px",
-                borderRadius: "0 0 6px 6px",
-                background: "rgba(0,0,0,0.20)",
-              }}
-            />
-          </div>
-
-          <div
-            data-among-us-leg="front"
-            className={`absolute ${isWalking ? "animate-amongus-leg-1" : ""}`}
-            style={{
-              bottom: "2px",
-              left: "6px",
-              width: "12px",
-              height: "14px",
-              borderRadius: "2px 2px 6px 6px",
-              background: CHARACTER_COLOR,
-              filter:
-                "drop-shadow(2px 0 0 #111) drop-shadow(-2px 0 0 #111) drop-shadow(0 2px 0 #111) drop-shadow(0 -2px 0 #111)",
-            }}
-          >
-            <div
-              className="absolute bottom-0 left-0 right-0"
-              style={{
-                height: "8px",
-                borderRadius: "0 0 6px 6px",
-                background: "rgba(0,0,0,0.20)",
-              }}
-            />
-          </div>
-
-          <div
-            data-among-us-leg="back"
-            className={`absolute ${isWalking ? "animate-amongus-leg-2" : ""}`}
-            style={{
-              bottom: "2px",
-              right: "4px",
-              width: "12px",
-              height: "14px",
-              borderRadius: "2px 2px 6px 6px",
-              background: CHARACTER_COLOR,
-              filter:
-                "drop-shadow(2px 0 0 #111) drop-shadow(-2px 0 0 #111) drop-shadow(0 2px 0 #111) drop-shadow(0 -2px 0 #111)",
-            }}
-          >
-            <div
-              className="absolute bottom-0 left-0 right-0"
-              style={{
-                height: "8px",
-                borderRadius: "0 0 6px 6px",
-                background: "rgba(0,0,0,0.20)",
-              }}
-            />
-          </div>
-
-          <div
-            className="absolute"
-            style={{
-              top: 0,
-              right: 0,
-              width: "28px",
-              height: "32px",
-              borderRadius: "14px 14px 6px 6px",
-              background: CHARACTER_COLOR,
-              filter:
-                "drop-shadow(2px 0 0 #111) drop-shadow(-2px 0 0 #111) drop-shadow(0 2px 0 #111) drop-shadow(0 -2px 0 #111)",
-              overflow: "hidden",
-            }}
-          >
-            <div
-              className="absolute inset-0"
-              style={{
-                background: "rgba(0,0,0,0.20)",
-                borderRadius: "14px 14px 6px 6px",
-                transform: "translateY(3px) translateX(3px)",
-              }}
-            />
-            <div
-              className="absolute"
-              style={{
-                top: "8px",
-                left: "8px",
-                width: "16px",
-                height: "12px",
-                borderRadius: "50%",
-                background: "rgba(255,255,255,0.18)",
-                filter: "blur(4px)",
-                transform: "translateY(-4px) translateX(2px)",
-              }}
-            />
-          </div>
-
-          <div
-            className="absolute"
-            style={{
-              top: "6px",
-              right: "-4px",
-              width: "20px",
-              height: "12px",
-              borderRadius: "9999px",
-              background: "#92D1DF",
-              filter:
-                "drop-shadow(2px 0 0 #111) drop-shadow(-2px 0 0 #111) drop-shadow(0 2px 0 #111) drop-shadow(0 -2px 0 #111)",
-              overflow: "hidden",
-            }}
-          >
-            <div
-              className="absolute"
-              style={{
-                top: "4px",
-                left: "1px",
-                right: "1px",
-                height: "10px",
-                borderRadius: "9999px",
-                background: "#527F8B",
-              }}
-            />
-            <div
-              className="absolute"
-              style={{
-                top: "2px",
-                right: "4px",
-                width: "10px",
-                height: "3px",
-                borderRadius: "9999px",
-                background: "rgba(255,255,255,0.85)",
-                transform: "rotate(-8deg)",
-              }}
-            />
-          </div>
-        </div>
+        <PetArtwork petId={selectedPet} walking={isWalking} />
       </div>
     </div>
   );

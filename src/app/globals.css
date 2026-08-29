@@ -42,7 +42,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-@keyframes amongUsLeg1 {
+@keyframes petFootLeft {
   0%,
   100% {
     transform: translateY(0) rotate(0deg);
@@ -61,7 +61,7 @@
   }
 }
 
-@keyframes amongUsLeg2 {
+@keyframes petFootRight {
   0%,
   100% {
     transform: translateY(0) rotate(0deg);
@@ -80,7 +80,7 @@
   }
 }
 
-@keyframes amongUsBob {
+@keyframes petBob {
   0%,
   100% {
     transform: translateY(0);
@@ -91,16 +91,56 @@
   }
 }
 
-.animate-amongus-leg-1 {
-  animation: amongUsLeg1 0.25s infinite linear;
+@keyframes petMiniHop {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
 }
 
-.animate-amongus-leg-2 {
-  animation: amongUsLeg2 0.25s infinite linear;
+@keyframes petFuse {
+  0%,
+  100% {
+    transform: rotate(18deg);
+  }
+
+  50% {
+    transform: rotate(30deg) translateY(-1px);
+  }
 }
 
-.animate-amongus-bob {
-  animation: amongUsBob 0.125s infinite linear;
+.animate-pet-foot-left {
+  animation: petFootLeft 0.25s infinite linear;
+}
+
+.animate-pet-foot-right {
+  animation: petFootRight 0.25s infinite linear;
+}
+
+.animate-pet-bob {
+  animation: petBob 0.125s infinite linear;
+}
+
+.animate-pet-mini-hop {
+  animation: petMiniHop 0.36s infinite ease-in-out;
+}
+
+.animate-pet-fuse {
+  animation: petFuse 0.32s infinite ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pet-foot-left,
+  .animate-pet-foot-right,
+  .animate-pet-bob,
+  .animate-pet-mini-hop,
+  .animate-pet-fuse {
+    animation: none;
+  }
 }
 
 :root {

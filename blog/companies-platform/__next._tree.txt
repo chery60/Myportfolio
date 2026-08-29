@@ -1,8 +1,8 @@
-:HL["/Myportfolio/_next/static/chunks/c4e374f406016841.css","style"]
+:HL["/Myportfolio/_next/static/chunks/2947d6010fed2f23.css","style"]
 :HL["/Myportfolio/_next/static/media/797e433ab948586e-s.p.29207c2f.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/Myportfolio/_next/static/media/caa3a2e1cccd8315-s.p.3b6cae6d.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/Myportfolio/case-studies/companies-platform/01-recurplatform.png","image"]
 :HL["/Myportfolio/case-studies/companies-platform/02-recur-img1.jpg","image"]
 :HL["/Myportfolio/case-studies/companies-platform/03-recur-img2.jpg","image"]
 :HL["/Myportfolio/case-studies/companies-platform/04-recur-img3.jpg","image"]
-0:{"buildId":"FeuXPwh-PS1KN1lT2THmm","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"blog","paramType":null,"paramKey":"blog","hasRuntimePrefetch":false,"slots":{"children":{"name":"slug","paramType":"d","paramKey":"companies-platform","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
+0:{"buildId":"WcgYjkvBIP7tLI4RQ4-aC","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"blog","paramType":null,"paramKey":"blog","hasRuntimePrefetch":false,"slots":{"children":{"name":"slug","paramType":"d","paramKey":"companies-platform","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":true},"staleTime":300}

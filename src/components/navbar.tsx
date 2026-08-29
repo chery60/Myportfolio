@@ -1,5 +1,6 @@
 import { Dock, DockIcon } from "@/components/magicui/dock";
 import { ModeToggle } from "@/components/mode-toggle";
+import PetSelector from "@/components/pet-selector";
 import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
@@ -85,6 +86,7 @@ export default function Navbar() {
           orientation="vertical"
           className="h-2/3 m-auto w-px bg-border"
         />
+        <PetSelector />
         <Tooltip>
           <TooltipTrigger asChild>
             <DockIcon className="rounded-3xl cursor-pointer size-full bg-background p-0 text-muted-foreground hover:text-foreground hover:bg-muted backdrop-blur-3xl border border-border transition-colors">
