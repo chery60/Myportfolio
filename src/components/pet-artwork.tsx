@@ -1,10 +1,15 @@
 "use client";
 
-import type { CSSProperties } from "react";
+/* eslint-disable @next/next/no-img-element */
+
+import type { Ref } from "react";
+import { withBasePath } from "@/lib/utils";
 
 export const DEFAULT_PET_ID = "among-us";
 export const PET_STORAGE_KEY = "portfolio-selected-pet";
 export const PET_CHANGE_EVENT = "portfolio-pet-change";
+
+export type MovementType = "walk" | "hop";
 
 export type PetId =
   | "among-us"
@@ -23,187 +28,201 @@ export type PetId =
   | "willow"
   | "hatchlings";
 
-type PetOption = {
+export type PetOption = {
   id: PetId;
   name: string;
   family: "Crewmate" | "Classic flock" | "Extended flock";
-};
-
-type BirdId = Exclude<PetId, "among-us" | "blues" | "hatchlings">;
-
-type BirdConfig = {
-  name: string;
-  body: string;
-  belly: string;
-  beak: string;
-  brow: string;
-  crest: string;
-  tail: string;
-  variant:
-    | "round"
-    | "triangle"
-    | "bomb"
-    | "egg"
-    | "large"
-    | "long"
-    | "eagle"
-    | "silver"
-    | "songbird";
+  movementType: MovementType;
+  assetPath?: string;
+  sourceWidth: number;
+  sourceHeight: number;
+  previewScale: number;
+  cursorScale: number;
 };
 
 type PetArtworkProps = {
   petId: PetId;
-  walking?: boolean;
+  moving?: boolean;
   preview?: boolean;
+  imageRef?: Ref<HTMLImageElement>;
+  shadowRef?: Ref<HTMLDivElement>;
 };
 
 const OUTLINE =
   "drop-shadow(2px 0 0 #111) drop-shadow(-2px 0 0 #111) drop-shadow(0 2px 0 #111) drop-shadow(0 -2px 0 #111)";
 
 const BODY_SHINE = "rgba(255,255,255,0.18)";
+const PET_ARTWORK_SIZE = 76;
+const PET_PREVIEW_SIZE = 88;
 
 export const PETS: PetOption[] = [
-  { id: "among-us", name: "Among Us", family: "Crewmate" },
-  { id: "red", name: "Red", family: "Classic flock" },
-  { id: "chuck", name: "Chuck", family: "Classic flock" },
-  { id: "bomb", name: "Bomb", family: "Classic flock" },
-  { id: "matilda", name: "Matilda", family: "Classic flock" },
-  { id: "stella", name: "Stella", family: "Classic flock" },
-  { id: "terence", name: "Terence", family: "Classic flock" },
-  { id: "mighty-eagle", name: "Mighty Eagle", family: "Classic flock" },
-  { id: "blues", name: "Blues", family: "Classic flock" },
-  { id: "hal", name: "Hal", family: "Classic flock" },
-  { id: "silver", name: "Silver", family: "Extended flock" },
-  { id: "bubbles", name: "Bubbles", family: "Extended flock" },
-  { id: "melody", name: "Melody", family: "Extended flock" },
-  { id: "willow", name: "Willow", family: "Extended flock" },
-  { id: "hatchlings", name: "Hatchlings", family: "Extended flock" },
+  {
+    id: "among-us",
+    name: "Among Us",
+    family: "Crewmate",
+    movementType: "walk",
+    sourceWidth: 36,
+    sourceHeight: 44,
+    previewScale: 1,
+    cursorScale: 1,
+  },
+  {
+    id: "red",
+    name: "Red",
+    family: "Classic flock",
+    movementType: "hop",
+    assetPath: "/pets/angry-birds/red.png",
+    sourceWidth: 1000,
+    sourceHeight: 1000,
+    previewScale: 1.08,
+    cursorScale: 1.08,
+  },
+  {
+    id: "chuck",
+    name: "Chuck",
+    family: "Classic flock",
+    movementType: "hop",
+    assetPath: "/pets/angry-birds/chuck.png",
+    sourceWidth: 1000,
+    sourceHeight: 1000,
+    previewScale: 1.04,
+    cursorScale: 1.05,
+  },
+  {
+    id: "bomb",
+    name: "Bomb",
+    family: "Classic flock",
+    movementType: "hop",
+    assetPath: "/pets/angry-birds/bomb.png",
+    sourceWidth: 1000,
+    sourceHeight: 1000,
+    previewScale: 1.05,
+    cursorScale: 1.06,
+  },
+  {
+    id: "matilda",
+    name: "Matilda",
+    family: "Classic flock",
+    movementType: "hop",
+    assetPath: "/pets/angry-birds/matilda.png",
+    sourceWidth: 1000,
+    sourceHeight: 1000,
+    previewScale: 1.04,
+    cursorScale: 1.05,
+  },
+  {
+    id: "stella",
+    name: "Stella",
+    family: "Classic flock",
+    movementType: "hop",
+    assetPath: "/pets/angry-birds/stella.png",
+    sourceWidth: 1000,
+    sourceHeight: 1000,
+    previewScale: 1.04,
+    cursorScale: 1.05,
+  },
+  {
+    id: "terence",
+    name: "Terence",
+    family: "Classic flock",
+    movementType: "hop",
+    assetPath: "/pets/angry-birds/terence.png",
+    sourceWidth: 1000,
+    sourceHeight: 1000,
+    previewScale: 1.08,
+    cursorScale: 1.08,
+  },
+  {
+    id: "mighty-eagle",
+    name: "Mighty Eagle",
+    family: "Classic flock",
+    movementType: "hop",
+    assetPath: "/pets/angry-birds/mighty-eagle.png",
+    sourceWidth: 1000,
+    sourceHeight: 1000,
+    previewScale: 1.08,
+    cursorScale: 1.08,
+  },
+  {
+    id: "blues",
+    name: "Blues",
+    family: "Classic flock",
+    movementType: "hop",
+    assetPath: "/pets/angry-birds/blues.png",
+    sourceWidth: 1000,
+    sourceHeight: 1000,
+    previewScale: 1.06,
+    cursorScale: 1.06,
+  },
+  {
+    id: "hal",
+    name: "Hal",
+    family: "Classic flock",
+    movementType: "hop",
+    assetPath: "/pets/angry-birds/hal.png",
+    sourceWidth: 1000,
+    sourceHeight: 1000,
+    previewScale: 1.08,
+    cursorScale: 1.08,
+  },
+  {
+    id: "silver",
+    name: "Silver",
+    family: "Extended flock",
+    movementType: "hop",
+    assetPath: "/pets/angry-birds/silver.png",
+    sourceWidth: 1000,
+    sourceHeight: 1000,
+    previewScale: 1.06,
+    cursorScale: 1.06,
+  },
+  {
+    id: "bubbles",
+    name: "Bubbles",
+    family: "Extended flock",
+    movementType: "hop",
+    assetPath: "/pets/angry-birds/bubbles.png",
+    sourceWidth: 1000,
+    sourceHeight: 1000,
+    previewScale: 1.06,
+    cursorScale: 1.06,
+  },
+  {
+    id: "melody",
+    name: "Melody",
+    family: "Extended flock",
+    movementType: "hop",
+    assetPath: "/pets/angry-birds/melody.png",
+    sourceWidth: 500,
+    sourceHeight: 500,
+    previewScale: 1.1,
+    cursorScale: 1.1,
+  },
+  {
+    id: "willow",
+    name: "Willow",
+    family: "Extended flock",
+    movementType: "hop",
+    assetPath: "/pets/angry-birds/willow.png",
+    sourceWidth: 842,
+    sourceHeight: 595,
+    previewScale: 1.16,
+    cursorScale: 1.14,
+  },
+  {
+    id: "hatchlings",
+    name: "Hatchlings",
+    family: "Extended flock",
+    movementType: "hop",
+    assetPath: "/pets/angry-birds/hatchlings.png",
+    sourceWidth: 1000,
+    sourceHeight: 1000,
+    previewScale: 1.08,
+    cursorScale: 1.08,
+  },
 ];
 
 const PET_IDS = new Set(PETS.map((pet) => pet.id));
-
-const BIRD_CONFIGS: Record<BirdId, BirdConfig> = {
-  red: {
-    name: "Red",
-    body: "#e63b2e",
-    belly: "#f3c78d",
-    beak: "#f6b332",
-    brow: "#351c14",
-    crest: "#9f1917",
-    tail: "#171717",
-    variant: "round",
-  },
-  chuck: {
-    name: "Chuck",
-    body: "#f7cf2f",
-    belly: "#f7e7a3",
-    beak: "#ed7d22",
-    brow: "#3a2714",
-    crest: "#1d1d1d",
-    tail: "#1d1d1d",
-    variant: "triangle",
-  },
-  bomb: {
-    name: "Bomb",
-    body: "#242424",
-    belly: "#3a3a3a",
-    beak: "#ef8c27",
-    brow: "#e2a443",
-    crest: "#f5cf54",
-    tail: "#111111",
-    variant: "bomb",
-  },
-  matilda: {
-    name: "Matilda",
-    body: "#f5f0de",
-    belly: "#f1d3a6",
-    beak: "#f2a32d",
-    brow: "#653a28",
-    crest: "#eee5d2",
-    tail: "#6a3325",
-    variant: "egg",
-  },
-  stella: {
-    name: "Stella",
-    body: "#e86aa7",
-    belly: "#f7bdd2",
-    beak: "#ef9c25",
-    brow: "#53223a",
-    crest: "#f7b3d0",
-    tail: "#b73875",
-    variant: "round",
-  },
-  terence: {
-    name: "Terence",
-    body: "#9f1917",
-    belly: "#e7a86d",
-    beak: "#f0a226",
-    brow: "#27110d",
-    crest: "#70100f",
-    tail: "#161616",
-    variant: "large",
-  },
-  "mighty-eagle": {
-    name: "Mighty Eagle",
-    body: "#74472f",
-    belly: "#f0ead5",
-    beak: "#f3b247",
-    brow: "#4a271c",
-    crest: "#f7f2df",
-    tail: "#3a2117",
-    variant: "eagle",
-  },
-  hal: {
-    name: "Hal",
-    body: "#52b864",
-    belly: "#d9f0bb",
-    beak: "#e89b2f",
-    brow: "#213b1f",
-    crest: "#2a8b45",
-    tail: "#255c32",
-    variant: "long",
-  },
-  silver: {
-    name: "Silver",
-    body: "#b8bec8",
-    belly: "#eef1f4",
-    beak: "#eaa640",
-    brow: "#323744",
-    crest: "#e7edf4",
-    tail: "#777f8c",
-    variant: "silver",
-  },
-  bubbles: {
-    name: "Bubbles",
-    body: "#f28c1f",
-    belly: "#ffd48d",
-    beak: "#f3b233",
-    brow: "#563214",
-    crest: "#f4b247",
-    tail: "#9e4f0c",
-    variant: "round",
-  },
-  melody: {
-    name: "Melody",
-    body: "#c7985e",
-    belly: "#f7dfb7",
-    beak: "#d88932",
-    brow: "#4a2a18",
-    crest: "#6f3a1d",
-    tail: "#6f3a1d",
-    variant: "songbird",
-  },
-  willow: {
-    name: "Willow",
-    body: "#67b8c9",
-    belly: "#d8f1ef",
-    beak: "#dfa153",
-    brow: "#234855",
-    crest: "#39798d",
-    tail: "#276171",
-    variant: "songbird",
-  },
-};
 
 export function isPetId(value: string | null): value is PetId {
   return Boolean(value && PET_IDS.has(value as PetId));
@@ -215,42 +234,111 @@ export function getPetById(id: PetId) {
 
 export function PetArtwork({
   petId,
-  walking = false,
+  moving = false,
   preview = false,
+  imageRef,
+  shadowRef,
 }: PetArtworkProps) {
-  const scale = preview ? 0.9 : 1;
+  const pet = getPetById(petId);
+  const size = preview ? PET_PREVIEW_SIZE : PET_ARTWORK_SIZE;
 
   return (
     <div
       data-pet-artwork={petId}
+      data-pet-movement={pet.movementType}
       className="relative select-none"
-      style={{
-        width: 58,
-        height: 58,
-        transform: `scale(${scale})`,
-        transformOrigin: "center bottom",
-      }}
+      style={{ width: size, height: size }}
     >
-      {petId === "among-us" ? (
-        <AmongUsPet walking={walking} />
-      ) : petId === "blues" ? (
-        <SmallFlockPet walking={walking} palette="blue" />
-      ) : petId === "hatchlings" ? (
-        <SmallFlockPet walking={walking} palette="hatchling" />
+      {pet.movementType === "walk" ? (
+        <AmongUsPet moving={moving} preview={preview} />
       ) : (
-        <BirdPet petId={petId} walking={walking} />
+        <BirdImagePet
+          pet={pet}
+          preview={preview}
+          imageRef={imageRef}
+          shadowRef={shadowRef}
+        />
       )}
     </div>
   );
 }
 
-function AmongUsPet({ walking }: { walking: boolean }) {
-  const characterColor = "#7170ff";
+function BirdImagePet({
+  pet,
+  preview,
+  imageRef,
+  shadowRef,
+}: {
+  pet: PetOption;
+  preview: boolean;
+  imageRef?: Ref<HTMLImageElement>;
+  shadowRef?: Ref<HTMLDivElement>;
+}) {
+  const boxSize = preview ? PET_PREVIEW_SIZE : PET_ARTWORK_SIZE;
+  const maxImageSize = preview ? 86 : 76;
+  const scale = preview ? pet.previewScale : pet.cursorScale;
+  const maxSourceSize = Math.max(pet.sourceWidth, pet.sourceHeight);
+  const width = (maxImageSize * scale * pet.sourceWidth) / maxSourceSize;
+  const height = (maxImageSize * scale * pet.sourceHeight) / maxSourceSize;
 
   return (
     <div
-      className={walking ? "animate-pet-bob" : undefined}
-      style={{ position: "absolute", left: 11, bottom: 6, width: 36, height: 44 }}
+      className="absolute inset-0 flex items-center justify-center"
+      style={{ overflow: "visible" }}
+    >
+      <div
+        ref={shadowRef}
+        data-pet-shadow
+        className="absolute rounded-full bg-black/15"
+        style={{
+          width: Math.min(width * 0.48, boxSize * 0.58),
+          height: 8,
+          bottom: preview ? 8 : 4,
+          left: "50%",
+          transform: "translateX(-50%)",
+        }}
+      />
+      <img
+        ref={imageRef}
+        src={withBasePath(pet.assetPath)}
+        alt=""
+        draggable={false}
+        data-pet-image={pet.id}
+        className="pointer-events-none select-none"
+        style={{
+          width,
+          height,
+          objectFit: "contain",
+          transformOrigin: "center bottom",
+          willChange: preview ? undefined : "transform",
+        }}
+      />
+    </div>
+  );
+}
+
+function AmongUsPet({
+  moving,
+  preview,
+}: {
+  moving: boolean;
+  preview: boolean;
+}) {
+  const characterColor = "#7170ff";
+  const scale = preview ? 1.08 : 1;
+
+  return (
+    <div
+      className={moving && !preview ? "animate-pet-bob" : undefined}
+      style={{
+        position: "absolute",
+        left: "50%",
+        bottom: preview ? 9 : 8,
+        width: 36,
+        height: 44,
+        transform: `translateX(-50%) scale(${scale})`,
+        transformOrigin: "center bottom",
+      }}
     >
       <PetShadow width={34} left={1} />
       <div
@@ -267,8 +355,16 @@ function AmongUsPet({ walking }: { walking: boolean }) {
       >
         <Shade height={11} radius="0 0 6px 6px" />
       </div>
-      <AmongUsLeg side="front" walking={walking} color={characterColor} />
-      <AmongUsLeg side="back" walking={walking} color={characterColor} />
+      <AmongUsLeg
+        side="front"
+        moving={moving && !preview}
+        color={characterColor}
+      />
+      <AmongUsLeg
+        side="back"
+        moving={moving && !preview}
+        color={characterColor}
+      />
       <div
         className="absolute overflow-hidden"
         style={{
@@ -345,17 +441,17 @@ function AmongUsPet({ walking }: { walking: boolean }) {
 
 function AmongUsLeg({
   side,
-  walking,
+  moving,
   color,
 }: {
   side: "front" | "back";
-  walking: boolean;
+  moving: boolean;
   color: string;
 }) {
   return (
     <div
       data-pet-leg={side}
-      className={`absolute ${walking ? `animate-pet-foot-${side === "front" ? "left" : "right"}` : ""}`}
+      className={`absolute ${moving ? `animate-pet-foot-${side === "front" ? "left" : "right"}` : ""}`}
       style={{
         bottom: 2,
         left: side === "front" ? 6 : undefined,
@@ -368,567 +464,6 @@ function AmongUsLeg({
       }}
     >
       <Shade height={8} radius="0 0 6px 6px" />
-    </div>
-  );
-}
-
-function BirdPet({ petId, walking }: { petId: BirdId; walking: boolean }) {
-  return <SingleBird config={BIRD_CONFIGS[petId]} walking={walking} />;
-}
-
-function SingleBird({
-  config,
-  walking,
-}: {
-  config: BirdConfig;
-  walking: boolean;
-}) {
-  const bodyStyle = getBirdBodyStyle(config);
-  const isTriangular = config.variant === "triangle";
-  const isBomb = config.variant === "bomb";
-  const isEagle = config.variant === "eagle";
-  const isLong = config.variant === "long";
-
-  return (
-    <div className={walking ? "animate-pet-bob" : undefined}>
-      <PetShadow width={isLong ? 46 : 38} left={isLong ? 6 : 10} />
-      <BirdTail color={config.tail} variant={config.variant} />
-      <BirdFeet walking={walking} />
-      <div className="absolute" style={bodyStyle}>
-        <BirdCrest color={config.crest} variant={config.variant} />
-        {isBomb ? <BombFuse color={config.crest} walking={walking} /> : null}
-        {isEagle ? <EagleHead color={config.crest} /> : null}
-        <BirdBelly color={config.belly} variant={config.variant} />
-        <BirdEyes brow={config.brow} variant={config.variant} />
-        <BirdBeak color={config.beak} variant={config.variant} />
-        {isTriangular ? <ChuckStripe /> : null}
-        {config.variant === "silver" ? <SilverLoop /> : null}
-        {config.variant === "songbird" ? <SongbirdWing color={config.tail} /> : null}
-      </div>
-    </div>
-  );
-}
-
-function getBirdBodyStyle(config: BirdConfig): CSSProperties {
-  const common: CSSProperties = {
-    position: "absolute",
-    background: config.body,
-    filter: OUTLINE,
-    overflow: "visible",
-  };
-
-  switch (config.variant) {
-    case "triangle":
-      return {
-        ...common,
-        left: 9,
-        bottom: 9,
-        width: 42,
-        height: 43,
-        clipPath: "polygon(50% 0%, 98% 80%, 50% 100%, 2% 80%)",
-      };
-    case "bomb":
-      return {
-        ...common,
-        left: 8,
-        bottom: 8,
-        width: 43,
-        height: 43,
-        borderRadius: "50%",
-      };
-    case "egg":
-      return {
-        ...common,
-        left: 11,
-        bottom: 7,
-        width: 37,
-        height: 46,
-        borderRadius: "48% 48% 44% 44%",
-      };
-    case "large":
-      return {
-        ...common,
-        left: 2,
-        bottom: 7,
-        width: 54,
-        height: 45,
-        borderRadius: "52% 52% 46% 46%",
-      };
-    case "long":
-      return {
-        ...common,
-        left: 3,
-        bottom: 11,
-        width: 52,
-        height: 34,
-        borderRadius: "65% 42% 58% 48%",
-        transform: "rotate(-7deg)",
-      };
-    case "eagle":
-      return {
-        ...common,
-        left: 6,
-        bottom: 7,
-        width: 47,
-        height: 44,
-        borderRadius: "55% 55% 46% 46%",
-      };
-    case "silver":
-      return {
-        ...common,
-        left: 9,
-        bottom: 8,
-        width: 41,
-        height: 44,
-        borderRadius: "52% 52% 44% 44%",
-        clipPath: "polygon(50% 0%, 88% 18%, 100% 58%, 74% 100%, 26% 100%, 0 58%, 12% 18%)",
-      };
-    case "songbird":
-      return {
-        ...common,
-        left: 8,
-        bottom: 8,
-        width: 42,
-        height: 43,
-        borderRadius: "54% 48% 45% 48%",
-      };
-    default:
-      return {
-        ...common,
-        left: 8,
-        bottom: 8,
-        width: 43,
-        height: 43,
-        borderRadius: "50% 50% 45% 45%",
-      };
-  }
-}
-
-function BirdTail({
-  color,
-  variant,
-}: {
-  color: string;
-  variant: BirdConfig["variant"];
-}) {
-  const long = variant === "long";
-  return (
-    <div
-      className="absolute"
-      style={{
-        left: long ? -1 : 5,
-        bottom: long ? 26 : 27,
-        width: long ? 18 : 15,
-        height: long ? 14 : 13,
-        background: color,
-        clipPath: "polygon(0 50%, 100% 0, 78% 50%, 100% 100%)",
-        filter: OUTLINE,
-        transform: long ? "rotate(8deg)" : "rotate(-8deg)",
-      }}
-    />
-  );
-}
-
-function BirdCrest({
-  color,
-  variant,
-}: {
-  color: string;
-  variant: BirdConfig["variant"];
-}) {
-  if (variant === "eagle") {
-    return null;
-  }
-
-  const crestStyle: CSSProperties =
-    variant === "triangle"
-      ? {
-          top: -8,
-          left: 16,
-          width: 12,
-          height: 14,
-          clipPath: "polygon(50% 0, 100% 100%, 0 100%)",
-        }
-      : {
-          top: -8,
-          left: variant === "large" ? 19 : 15,
-          width: variant === "songbird" ? 18 : 15,
-          height: 13,
-          borderRadius: "90% 30% 90% 30%",
-          transform: "rotate(-18deg)",
-        };
-
-  return (
-    <div
-      className="absolute"
-      style={{
-        ...crestStyle,
-        background: color,
-        filter: OUTLINE,
-      }}
-    />
-  );
-}
-
-function BombFuse({ color, walking }: { color: string; walking: boolean }) {
-  return (
-    <div
-      className={`absolute ${walking ? "animate-pet-fuse" : ""}`}
-      style={{
-        top: -12,
-        left: 20,
-        width: 13,
-        height: 15,
-        borderTop: "3px solid #111",
-        borderRight: `4px solid ${color}`,
-        borderRadius: "50%",
-        transform: "rotate(18deg)",
-      }}
-    />
-  );
-}
-
-function EagleHead({ color }: { color: string }) {
-  return (
-    <div
-      className="absolute"
-      style={{
-        top: -7,
-        left: 6,
-        right: 5,
-        height: 19,
-        borderRadius: "50% 50% 35% 35%",
-        background: color,
-        filter: OUTLINE,
-      }}
-    />
-  );
-}
-
-function BirdBelly({
-  color,
-  variant,
-}: {
-  color: string;
-  variant: BirdConfig["variant"];
-}) {
-  return (
-    <div
-      className="absolute"
-      style={{
-        left: variant === "large" ? 13 : 10,
-        bottom: -1,
-        width: variant === "large" ? 29 : 23,
-        height: variant === "long" ? 16 : 19,
-        borderRadius: "50% 50% 42% 42%",
-        background: color,
-        opacity: 0.96,
-      }}
-    />
-  );
-}
-
-function BirdEyes({
-  brow,
-  variant,
-}: {
-  brow: string;
-  variant: BirdConfig["variant"];
-}) {
-  const top = variant === "eagle" ? 10 : variant === "triangle" ? 19 : 13;
-  const leftEyeLeft = variant === "long" ? 23 : 15;
-  const rightEyeLeft = variant === "long" ? 33 : 25;
-
-  return (
-    <>
-      <BirdEye left={leftEyeLeft} top={top} pupilLeft={5} />
-      <BirdEye left={rightEyeLeft} top={top} pupilLeft={3} />
-      <div
-        className="absolute"
-        style={{
-          top: top - 3,
-          left: leftEyeLeft - 2,
-          width: 14,
-          height: 4,
-          borderRadius: 999,
-          background: brow,
-          transform: "rotate(18deg)",
-        }}
-      />
-      <div
-        className="absolute"
-        style={{
-          top: top - 4,
-          left: rightEyeLeft - 1,
-          width: 14,
-          height: 4,
-          borderRadius: 999,
-          background: brow,
-          transform: "rotate(-18deg)",
-        }}
-      />
-    </>
-  );
-}
-
-function BirdEye({
-  left,
-  top,
-  pupilLeft,
-}: {
-  left: number;
-  top: number;
-  pupilLeft: number;
-}) {
-  return (
-    <div
-      className="absolute"
-      style={{
-        top,
-        left,
-        width: 12,
-        height: 13,
-        borderRadius: "50%",
-        background: "#f8f8f8",
-        boxShadow: "inset 0 -1px 0 rgba(0,0,0,0.18)",
-      }}
-    >
-      <div
-        className="absolute"
-        style={{
-          left: pupilLeft,
-          top: 5,
-          width: 4,
-          height: 4,
-          borderRadius: "50%",
-          background: "#171717",
-        }}
-      />
-    </div>
-  );
-}
-
-function BirdBeak({
-  color,
-  variant,
-}: {
-  color: string;
-  variant: BirdConfig["variant"];
-}) {
-  const long = variant === "long";
-  return (
-    <div
-      className="absolute"
-      style={{
-        top: long ? 17 : variant === "triangle" ? 28 : 24,
-        right: long ? -13 : -9,
-        width: long ? 26 : 19,
-        height: long ? 13 : 12,
-        background: color,
-        clipPath: "polygon(0 0, 100% 50%, 0 100%)",
-        filter: OUTLINE,
-      }}
-    />
-  );
-}
-
-function ChuckStripe() {
-  return (
-    <div
-      className="absolute"
-      style={{
-        left: 17,
-        top: 10,
-        width: 10,
-        height: 24,
-        borderRadius: 999,
-        background: "rgba(255,255,255,0.16)",
-        transform: "rotate(12deg)",
-      }}
-    />
-  );
-}
-
-function SilverLoop() {
-  return (
-    <div
-      className="absolute"
-      style={{
-        left: 13,
-        top: -12,
-        width: 16,
-        height: 16,
-        borderRadius: "50%",
-        border: "5px solid #dfe5ec",
-        borderBottomColor: "transparent",
-        transform: "rotate(-18deg)",
-        filter: OUTLINE,
-      }}
-    />
-  );
-}
-
-function SongbirdWing({ color }: { color: string }) {
-  return (
-    <div
-      className="absolute"
-      style={{
-        left: 3,
-        top: 21,
-        width: 15,
-        height: 18,
-        borderRadius: "60% 35% 55% 45%",
-        background: color,
-        opacity: 0.55,
-      }}
-    />
-  );
-}
-
-function BirdFeet({ walking }: { walking: boolean }) {
-  return (
-    <>
-      <div
-        className={`absolute ${walking ? "animate-pet-foot-left" : ""}`}
-        style={{
-          left: 21,
-          bottom: 6,
-          width: 10,
-          height: 6,
-          borderRadius: "0 0 6px 6px",
-          background: "#ef9c25",
-          filter: OUTLINE,
-        }}
-      />
-      <div
-        className={`absolute ${walking ? "animate-pet-foot-right" : ""}`}
-        style={{
-          left: 32,
-          bottom: 6,
-          width: 10,
-          height: 6,
-          borderRadius: "0 0 6px 6px",
-          background: "#ef9c25",
-          filter: OUTLINE,
-        }}
-      />
-    </>
-  );
-}
-
-function SmallFlockPet({
-  walking,
-  palette,
-}: {
-  walking: boolean;
-  palette: "blue" | "hatchling";
-}) {
-  const birds =
-    palette === "blue"
-      ? [
-          { body: "#3f9fe3", belly: "#cfe9ff", left: 7, top: 13 },
-          { body: "#4db6f2", belly: "#d9f1ff", left: 22, top: 7 },
-          { body: "#2f87cf", belly: "#c5e6ff", left: 35, top: 15 },
-        ]
-      : [
-          { body: "#f6d54a", belly: "#fff0a6", left: 6, top: 16 },
-          { body: "#f7bbd2", belly: "#ffe1ec", left: 22, top: 9 },
-          { body: "#8dd8ef", belly: "#dff7ff", left: 37, top: 16 },
-        ];
-
-  return (
-    <div className={walking ? "animate-pet-bob" : undefined}>
-      <PetShadow width={45} left={7} />
-      {birds.map((bird, index) => (
-        <MiniBird
-          key={`${palette}-${index}`}
-          body={bird.body}
-          belly={bird.belly}
-          left={bird.left}
-          top={bird.top}
-          walking={walking}
-          delay={index * 80}
-        />
-      ))}
-    </div>
-  );
-}
-
-function MiniBird({
-  body,
-  belly,
-  left,
-  top,
-  walking,
-  delay,
-}: {
-  body: string;
-  belly: string;
-  left: number;
-  top: number;
-  walking: boolean;
-  delay: number;
-}) {
-  return (
-    <div
-      className={`absolute ${walking ? "animate-pet-mini-hop" : ""}`}
-      style={{
-        left,
-        top,
-        width: 21,
-        height: 24,
-        borderRadius: "50% 50% 45% 45%",
-        background: body,
-        filter: OUTLINE,
-        animationDelay: `${delay}ms`,
-      }}
-    >
-      <div
-        className="absolute"
-        style={{
-          left: 5,
-          bottom: 0,
-          width: 11,
-          height: 9,
-          borderRadius: "50%",
-          background: belly,
-        }}
-      />
-      <div
-        className="absolute"
-        style={{
-          top: 8,
-          left: 8,
-          width: 6,
-          height: 6,
-          borderRadius: "50%",
-          background: "#fff",
-        }}
-      >
-        <div
-          className="absolute"
-          style={{
-            top: 2,
-            left: 2,
-            width: 2,
-            height: 2,
-            borderRadius: "50%",
-            background: "#111",
-          }}
-        />
-      </div>
-      <div
-        className="absolute"
-        style={{
-          top: 13,
-          right: -6,
-          width: 11,
-          height: 7,
-          clipPath: "polygon(0 0, 100% 50%, 0 100%)",
-          background: "#f2a32d",
-          filter: OUTLINE,
-        }}
-      />
     </div>
   );
 }

@@ -94,7 +94,7 @@ export default function PetSelector() {
                       data-pet-choice={pet.id}
                       aria-pressed={isSelected}
                       className={cn(
-                        "relative flex h-32 flex-col items-center justify-between rounded-lg border bg-background p-3 text-center transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                        "relative flex h-36 flex-col items-center justify-between rounded-lg border bg-background p-3 text-center transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                         isSelected
                           ? "border-primary ring-2 ring-primary/15"
                           : "border-border"
@@ -106,8 +106,8 @@ export default function PetSelector() {
                           <Check className="size-3.5 text-primary" />
                         ) : null}
                       </span>
-                      <span className="flex h-16 items-end justify-center">
-                        <PetArtwork petId={pet.id} walking preview />
+                      <span className="flex h-24 w-full items-center justify-center overflow-visible">
+                        <PetArtwork petId={pet.id} preview />
                       </span>
                       <span className="w-full min-w-0">
                         <span className="block truncate text-sm font-medium leading-tight">

@@ -91,28 +91,6 @@
   }
 }
 
-@keyframes petMiniHop {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-5px);
-  }
-}
-
-@keyframes petFuse {
-  0%,
-  100% {
-    transform: rotate(18deg);
-  }
-
-  50% {
-    transform: rotate(30deg) translateY(-1px);
-  }
-}
-
 .animate-pet-foot-left {
   animation: petFootLeft 0.25s infinite linear;
 }
@@ -125,20 +103,10 @@
   animation: petBob 0.125s infinite linear;
 }
 
-.animate-pet-mini-hop {
-  animation: petMiniHop 0.36s infinite ease-in-out;
-}
-
-.animate-pet-fuse {
-  animation: petFuse 0.32s infinite ease-in-out;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .animate-pet-foot-left,
   .animate-pet-foot-right,
-  .animate-pet-bob,
-  .animate-pet-mini-hop,
-  .animate-pet-fuse {
+  .animate-pet-bob {
     animation: none;
   }
 }
