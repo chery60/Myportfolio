@@ -42,6 +42,67 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+@keyframes amongUsLeg1 {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  25% {
+    transform: translateY(-4px) translateX(2px) rotate(-10deg);
+  }
+
+  50% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  75% {
+    transform: translateY(0) rotate(10deg);
+  }
+}
+
+@keyframes amongUsLeg2 {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  25% {
+    transform: translateY(0) rotate(10deg);
+  }
+
+  50% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  75% {
+    transform: translateY(-4px) translateX(2px) rotate(-10deg);
+  }
+}
+
+@keyframes amongUsBob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.animate-amongus-leg-1 {
+  animation: amongUsLeg1 0.25s infinite linear;
+}
+
+.animate-amongus-leg-2 {
+  animation: amongUsLeg2 0.25s infinite linear;
+}
+
+.animate-amongus-bob {
+  animation: amongUsBob 0.125s infinite linear;
+}
+
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
