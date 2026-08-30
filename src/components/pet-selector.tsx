@@ -17,7 +17,9 @@ import {
   type PetId,
 } from "@/components/pet-artwork";
 import {
+  persistPetFollowCursor,
   persistSelectedPet,
+  usePetFollowCursor,
   useSelectedPet,
 } from "@/components/use-selected-pet";
 import { cn } from "@/lib/utils";
@@ -25,6 +27,7 @@ import { cn } from "@/lib/utils";
 export default function PetSelector() {
   const [isOpen, setIsOpen] = useState(false);
   const selectedPet = useSelectedPet();
+  const followCursor = usePetFollowCursor();
   const selectedPetOption = useMemo(() => getPetById(selectedPet), [selectedPet]);
 
   useEffect(() => {
@@ -44,6 +47,10 @@ export default function PetSelector() {
 
   const selectPet = (petId: PetId) => {
     persistSelectedPet(petId);
+  };
+
+  const toggleFollowCursor = () => {
+    persistPetFollowCursor(!followCursor);
   };
 
   const modal =
@@ -73,14 +80,45 @@ export default function PetSelector() {
                     {selectedPetOption.name}
                   </p>
                 </div>
-                <button
-                  type="button"
-                  aria-label="Close pet selector"
-                  className="inline-flex size-8 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <X className="size-4" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={followCursor}
+                    aria-label="Follow Cursor"
+                    data-follow-cursor-toggle
+                    className={cn(
+                      "inline-flex h-8 items-center gap-2 rounded-full border px-2.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                      followCursor
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
+                    )}
+                    onClick={toggleFollowCursor}
+                  >
+                    <span
+                      className={cn(
+                        "relative h-4 w-7 rounded-full transition-colors",
+                        followCursor ? "bg-primary" : "bg-muted-foreground/25"
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "absolute top-0.5 size-3 rounded-full bg-background shadow-sm transition-transform",
+                          followCursor ? "translate-x-3.5" : "translate-x-0.5"
+                        )}
+                      />
+                    </span>
+                    <span className="hidden sm:inline">Follow Cursor</span>
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Close pet selector"
+                    className="inline-flex size-8 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <X className="size-4" />
+                  </button>
+                </div>
               </div>
 
               <div className="grid max-h-[min(68vh,560px)] grid-cols-3 gap-2 overflow-y-auto pr-1 sm:grid-cols-5">

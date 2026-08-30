@@ -13,7 +13,11 @@ import {
   type MovementType,
   type PetId,
 } from "@/components/pet-artwork";
-import { useSelectedPet } from "@/components/use-selected-pet";
+import {
+  usePetFollowCursor,
+  useSelectedPet,
+} from "@/components/use-selected-pet";
+import { cn } from "@/lib/utils";
 
 type Point = {
   x: number;
@@ -196,6 +200,7 @@ export default function PetCursor() {
   const visibleRef = useRef(false);
   const reducedMotionRef = useRef(false);
   const selectedPet = useSelectedPet();
+  const followCursor = usePetFollowCursor();
   const movementType = getPetById(selectedPet).movementType;
   const selectedPetRef = useRef<PetId>(selectedPet);
   const movementTypeRef = useRef<MovementType>(movementType);
@@ -273,7 +278,40 @@ export default function PetCursor() {
   }, [selectedPet, setMoving]);
 
   useEffect(() => {
-    if (!isEnabled) {
+    if (followCursor || !isEnabled) {
+      return;
+    }
+
+    visibleRef.current = true;
+    flightRef.current = createIdleFlightState();
+    particlesRef.current = [];
+    targetRef.current = { x: 0, y: 0 };
+    positionRef.current = { x: 0, y: 0 };
+
+    if (spriteRef.current) {
+      spriteRef.current.style.transform = "scaleX(1)";
+    }
+    if (birdImageRef.current) {
+      birdImageRef.current.style.transform = "";
+      birdImageRef.current.style.filter = "";
+    }
+    if (birdShadowRef.current) {
+      birdShadowRef.current.style.transform = "translateX(-50%)";
+      birdShadowRef.current.style.opacity = "";
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      setIsVisible(true);
+      setFlightPhase("idle");
+      setParticles([]);
+      setMoving(false);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [followCursor, isEnabled, selectedPet, setMoving]);
+
+  useEffect(() => {
+    if (!isEnabled || !followCursor) {
       return;
     }
 
@@ -795,42 +833,59 @@ export default function PetCursor() {
       resetFlightVisual();
       setMoving(false);
     };
-  }, [isEnabled, setFlightState, setMoving]);
+  }, [followCursor, isEnabled, setFlightState, setMoving]);
 
   if (!isEnabled) {
     return null;
   }
 
+  const activeFlightPhase = followCursor ? flightPhase : "idle";
+  const activeWalking = followCursor && movementType === "walk" && isMoving;
+  const activeFlying = followCursor && movementType === "fly" && isMoving;
+
   return (
     <>
-      <div
-        aria-hidden="true"
-        className="fixed inset-0 z-20 pointer-events-none overflow-hidden"
-      >
-        {particles.map((particle) => (
-          <FlightParticleView key={particle.id} particle={particle} />
-        ))}
-      </div>
+      {followCursor ? (
+        <div
+          aria-hidden="true"
+          className="fixed inset-0 z-20 pointer-events-none overflow-hidden"
+        >
+          {particles.map((particle) => (
+            <FlightParticleView key={particle.id} particle={particle} />
+          ))}
+        </div>
+      ) : null}
       <div
         ref={characterRef}
         aria-hidden="true"
         data-pet-cursor
+        data-follow-cursor={followCursor}
+        data-static-pet={!followCursor}
         data-selected-pet={selectedPet}
         data-movement-type={movementType}
-        data-flight-phase={flightPhase}
-        data-walking={movementType === "walk" && isMoving}
-        data-flying={movementType === "fly" && isMoving}
-        data-depth-flight={usesDepthFlight}
-        className="fixed left-0 top-0 z-20 h-[76px] w-[76px] -ml-[38px] -mt-[76px] pointer-events-none select-none transition-opacity duration-150 will-change-transform"
-        style={{
-          opacity: isVisible ? 1 : 0,
-          transform: "translate3d(120px, 120px, 0)",
-        }}
+        data-flight-phase={activeFlightPhase}
+        data-walking={activeWalking}
+        data-flying={activeFlying}
+        data-depth-flight={followCursor && usesDepthFlight}
+        className={cn(
+          "fixed z-20 h-[76px] w-[76px] pointer-events-none select-none transition-opacity duration-150",
+          followCursor
+            ? "left-0 top-0 -ml-[38px] -mt-[76px] will-change-transform"
+            : "bottom-24 right-6"
+        )}
+        style={
+          followCursor
+            ? {
+                opacity: isVisible ? 1 : 0,
+                transform: "translate3d(120px, 120px, 0)",
+              }
+            : { opacity: 1 }
+        }
       >
         <div ref={spriteRef} style={{ transform: "scaleX(1)" }}>
           <PetArtwork
             petId={selectedPet}
-            moving={movementType === "walk" && isMoving}
+            moving={activeWalking}
             imageRef={birdImageRef}
             shadowRef={birdShadowRef}
           />
