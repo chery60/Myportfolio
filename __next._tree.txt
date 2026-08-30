@@ -1,4 +1,4 @@
-:HL["/Myportfolio/_next/static/chunks/565eb6515a143b8d.css","style"]
+:HL["/Myportfolio/_next/static/chunks/834362a4bcc6dfd9.css","style"]
 :HL["/Myportfolio/_next/static/media/797e433ab948586e-s.p.29207c2f.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/Myportfolio/_next/static/media/caa3a2e1cccd8315-s.p.3b6cae6d.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/Myportfolio/logo-jntuk.png","image"]
@@ -7,4 +7,4 @@
 :HL["/Myportfolio/project-ai-portfolio.png","image"]
 :HL["/Myportfolio/project-engagement-panel.png","image"]
 :HL["/Myportfolio/project-vibe-lab.png","image"]
-0:{"buildId":"k_kwbXg5BG4LlWWJnI8lm","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
+0:{"buildId":"e0o36Frkrq4ntD0CeQqge","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":true},"staleTime":300}

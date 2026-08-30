@@ -80,36 +80,36 @@ export default function PetSelector() {
                     {selectedPetOption.name}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={followCursor}
-                    aria-label="Follow Cursor"
-                    data-follow-cursor-toggle
-                    className={cn(
-                      "inline-flex h-8 items-center gap-2 rounded-full border px-2.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                      followCursor
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
-                    )}
-                    onClick={toggleFollowCursor}
-                  >
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
                     <span
+                      id="pet-follow-cursor-label"
+                      className="hidden text-sm font-medium text-muted-foreground sm:inline"
+                    >
+                      Follow Cursor
+                    </span>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={followCursor}
+                      aria-labelledby="pet-follow-cursor-label"
+                      data-follow-cursor-toggle
                       className={cn(
-                        "relative h-4 w-7 rounded-full transition-colors",
-                        followCursor ? "bg-primary" : "bg-muted-foreground/25"
+                        "relative h-6 w-11 rounded-full border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                        followCursor
+                          ? "border-primary bg-primary"
+                          : "border-border bg-muted hover:bg-muted-foreground/20"
                       )}
+                      onClick={toggleFollowCursor}
                     >
                       <span
                         className={cn(
-                          "absolute top-0.5 size-3 rounded-full bg-background shadow-sm transition-transform",
-                          followCursor ? "translate-x-3.5" : "translate-x-0.5"
+                          "absolute left-0.5 top-0.5 size-5 rounded-full bg-background shadow-sm transition-transform",
+                          followCursor ? "translate-x-5" : "translate-x-0"
                         )}
                       />
-                    </span>
-                    <span className="hidden sm:inline">Follow Cursor</span>
-                  </button>
+                    </button>
+                  </div>
                   <button
                     type="button"
                     aria-label="Close pet selector"
