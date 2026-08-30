@@ -871,7 +871,7 @@ export default function PetCursor() {
           "fixed z-20 h-[76px] w-[76px] pointer-events-none select-none transition-opacity duration-150",
           followCursor
             ? "left-0 top-0 -ml-[38px] -mt-[76px] will-change-transform"
-            : "bottom-24 right-6"
+            : "bottom-6 right-6"
         )}
         style={
           followCursor
