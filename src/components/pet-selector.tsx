@@ -104,7 +104,7 @@ export default function PetSelector() {
                     >
                       <span
                         className={cn(
-                          "absolute left-0.5 top-0.5 size-5 rounded-full bg-background shadow-sm transition-transform",
+                          "absolute left-0.5 top-1/2 size-5 -translate-y-1/2 rounded-full bg-background shadow-sm transition-transform",
                           followCursor ? "translate-x-5" : "translate-x-0"
                         )}
                       />
