@@ -1,0 +1,86 @@
+/*
+ * The magnifying glass. The lens layer is not transformed itself (the mask
+ * lives there); its content is scaled about the glass centre by use-loupe.
+ * No will-change on the content: it would be rasterised before scaling and
+ * blur the very text the glass is for.
+ */
+
+.root {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.lens {
+  --lens-mask: radial-gradient(
+    circle var(--glass-r, 90px) at var(--lx, 50%) var(--ly, 50%),
+    #000 calc(100% - 1px),
+    transparent 100%
+  );
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  -webkit-mask-image: var(--lens-mask);
+  mask-image: var(--lens-mask);
+}
+
+:global([data-turning]) .lens {
+  visibility: hidden;
+}
+
+.content {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 100%;
+  transform-origin: 0 0;
+}
+
+.glass {
+  --glass-d: 188px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--glass-d);
+  height: var(--glass-d);
+  border-radius: 50%;
+  pointer-events: auto;
+  touch-action: none;
+  cursor: grab;
+  background:
+    radial-gradient(circle at 32% 26%, rgb(255 255 255 / 0.24), transparent 34%),
+    radial-gradient(circle, transparent 64%, rgb(30 20 10 / 0.14) 100%);
+  box-shadow:
+    inset 0 0 0 calc(var(--glass-d) * 0.05) #3b342c,
+    inset 0 0 0 calc(var(--glass-d) * 0.062) rgb(255 255 255 / 0.35),
+    inset 0 calc(var(--glass-d) * 0.06) calc(var(--glass-d) * 0.12) rgb(255 255 255 / 0.16),
+    0 14px 26px -8px rgb(20 12 4 / 0.5),
+    0 3px 8px rgb(20 12 4 / 0.28);
+}
+
+/* The handle, angled down and to the right from the rim. */
+.glass::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(var(--glass-d) * 0.15);
+  height: calc(var(--glass-d) * 0.58);
+  border-radius: 999px;
+  transform-origin: 50% 0;
+  transform: translateX(-50%) rotate(-42deg) translateY(calc(var(--glass-d) * 0.49));
+  background: linear-gradient(90deg, #4a301b, #8a6038 45%, #5a3d24);
+  box-shadow: 0 8px 14px -6px rgb(20 12 4 / 0.55);
+  pointer-events: auto;
+}
+
+.glass[data-dragging] {
+  cursor: grabbing;
+}
+
+.glass:focus-visible {
+  outline: 2px solid var(--book-pencil);
+  outline-offset: 4px;
+}

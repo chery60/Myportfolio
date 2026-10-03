@@ -7,6 +7,8 @@ import { MDXContent } from "@content-collections/mdx/react";
 import { mdxComponents } from "@/mdx-components";
 import { ProjectBackLink, ProjectBackLinkFallback } from "@/components/project-back-link";
 import { CaseStudyVideo } from "@/components/case-study-video";
+import { ProjectBookSection } from "@/components/project-book/project-book-section";
+import { getProjectBook } from "@/data/books";
 import { PetGreeting } from "@/components/pet-greeting";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -94,6 +96,7 @@ export default async function Blog({
     notFound();
   }
 
+  const book = getProjectBook(slug);
   const previousPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
   const nextPost = currentIndex < sortedPosts.length - 1 ? sortedPosts[currentIndex + 1] : null;
 
@@ -173,7 +176,11 @@ export default async function Blog({
           }}
         />
       </div>
-      <article className="prose max-w-full text-pretty font-sans leading-relaxed text-muted-foreground dark:prose-invert">
+      {book && <ProjectBookSection book={book} />}
+      <article
+        id="case-study"
+        className="prose max-w-full scroll-mt-8 text-pretty font-sans leading-relaxed text-muted-foreground dark:prose-invert"
+      >
         <MDXContent
           code={post.mdx}
           components={{ ...mdxComponents, ProjectVideo }}

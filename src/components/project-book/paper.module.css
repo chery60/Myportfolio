@@ -1,0 +1,308 @@
+/*
+ * A sheet of sketchbook paper. Everything inside scales with the page
+ * (container query units), so a page reads the same at 340px on a phone and
+ * 444px in a desktop spread; `clamp()` keeps text legible at the low end.
+ *
+ * Colours come from the book frame (project-book.module.css) so the paper
+ * stays paper-coloured in dark mode.
+ */
+
+.page {
+  position: relative;
+  container: book-page / inline-size;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  color: var(--book-ink);
+  background-color: var(--book-paper);
+  background-image: var(--book-grain);
+  background-size: 180px 180px;
+}
+
+/* Shade where the page curves into the spine. */
+.page::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  width: 9%;
+  pointer-events: none;
+}
+
+.page[data-spine="left"]::after {
+  left: 0;
+  background: linear-gradient(to right, rgb(60 44 24 / 0.16), rgb(60 44 24 / 0.04) 45%, transparent);
+}
+
+.page[data-spine="right"]::after {
+  right: 0;
+  background: linear-gradient(to left, rgb(60 44 24 / 0.16), rgb(60 44 24 / 0.04) 45%, transparent);
+}
+
+.inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2.6cqi;
+  padding: 7cqi 7.5cqi 8.5cqi;
+  overflow: hidden;
+}
+
+.page[data-spine="left"] .inner {
+  padding-left: 9cqi;
+}
+
+.page[data-spine="right"] .inner {
+  padding-right: 9cqi;
+}
+
+.kicker {
+  flex: none;
+  margin: 0;
+  font-family: var(--font-book-body), Georgia, serif;
+  font-size: clamp(10px, 2.6cqi, 13px);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--book-marker);
+}
+
+.heading {
+  flex: none;
+  margin: 0;
+  font-family: var(--font-book-display), Georgia, serif;
+  font-size: clamp(22px, 8cqi, 40px);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.body {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1.6cqi;
+}
+
+.body p,
+.list,
+.calloutText {
+  margin: 0;
+  font-family: var(--font-book-body), Georgia, serif;
+  font-size: clamp(12.5px, 3.75cqi, 18px);
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+
+.list {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9cqi;
+  padding-left: 1.25em;
+}
+
+.list li::marker {
+  color: var(--book-marker);
+}
+
+ul.list {
+  list-style: "– ";
+}
+
+ol.list {
+  list-style: decimal;
+}
+
+.note {
+  flex: none;
+  margin: 0;
+  font-family: var(--font-book-hand), "Segoe Print", cursive;
+  font-size: clamp(15px, 4.6cqi, 22px);
+  line-height: 1.15;
+  color: var(--book-pencil);
+  transform: rotate(-1.4deg);
+  transform-origin: left center;
+}
+
+.note[data-align="end"] {
+  align-self: flex-end;
+  text-align: right;
+  transform: rotate(1.2deg);
+  transform-origin: right center;
+}
+
+/* --- Photos ------------------------------------------------------------- */
+
+.figure,
+.screens {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.8cqi;
+  margin: 0;
+}
+
+.photoArea {
+  flex: 1 1 0;
+  min-height: 0;
+  container-type: size;
+  display: grid;
+  place-items: center;
+}
+
+.photo {
+  position: relative;
+  width: min(94cqw, 92cqh * var(--ar));
+  aspect-ratio: var(--ar);
+  padding: 1.4%;
+  background: #fbfaf6;
+  box-shadow:
+    0 1px 1px rgb(40 30 15 / 0.12),
+    0 8px 18px -10px rgb(40 30 15 / 0.45);
+  transform: rotate(var(--tilt, 0deg));
+}
+
+.img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Strips of masking tape. */
+.photo[data-tape="corners"]::before,
+.photo[data-tape="corners"]::after,
+.photo[data-tape="top"]::before {
+  content: "";
+  position: absolute;
+  width: clamp(28px, 22%, 70px);
+  height: clamp(10px, 7%, 20px);
+  background: rgb(246 232 186 / 0.72);
+  box-shadow: 0 1px 1px rgb(40 30 15 / 0.08);
+}
+
+.photo[data-tape="corners"]::before {
+  top: -3%;
+  left: -5%;
+  transform: rotate(-38deg);
+}
+
+.photo[data-tape="corners"]::after {
+  top: -3%;
+  right: -5%;
+  transform: rotate(38deg);
+}
+
+.photo[data-tape="top"]::before {
+  top: -4.5%;
+  left: 50%;
+  transform: translateX(-50%) rotate(-2deg);
+}
+
+.caption {
+  flex: none;
+  font-family: var(--font-book-hand), "Segoe Print", cursive;
+  font-size: clamp(13px, 3.9cqi, 19px);
+  line-height: 1.15;
+  text-align: center;
+  color: var(--book-ink-soft);
+}
+
+/* --- Screens strip ------------------------------------------------------ */
+
+.screenRow {
+  flex: 1 1 0;
+  min-height: 0;
+  container-type: size;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3cqw;
+}
+
+.screen {
+  flex: none;
+  aspect-ratio: var(--ar);
+  height: min(96cqh, calc((100cqw - (var(--n) - 1) * 3cqw) / var(--n) / var(--ar)));
+  overflow: hidden;
+  border-radius: 6%/3.4%;
+  background: #fbfaf6;
+  box-shadow:
+    0 0 0 1px rgb(40 30 15 / 0.14),
+    0 6px 14px -8px rgb(40 30 15 / 0.5);
+}
+
+.screen:nth-child(odd) {
+  transform: rotate(-1deg);
+}
+
+.screen:nth-child(even) {
+  transform: rotate(1deg);
+}
+
+/* --- Callout ------------------------------------------------------------ */
+
+.callout {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1cqi;
+  padding: 3cqi 3.6cqi;
+  border: 1.5px dashed rgb(164 68 42 / 0.55);
+  border-radius: 2.4cqi;
+  background: rgb(255 255 255 / 0.28);
+}
+
+.calloutLabel {
+  margin: 0;
+  font-family: var(--font-book-body), Georgia, serif;
+  font-size: clamp(10px, 2.6cqi, 13px);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--book-marker);
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4cqi 3.2cqi;
+  margin: 0;
+  font-family: var(--font-book-hand), "Segoe Print", cursive;
+  font-size: clamp(15px, 4.4cqi, 21px);
+}
+
+.link {
+  color: var(--book-pencil);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+.link:focus-visible {
+  outline: 2px solid var(--book-pencil);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* --- Page number -------------------------------------------------------- */
+
+.folio {
+  position: absolute;
+  bottom: 3.4cqi;
+  font-family: var(--font-book-display), Georgia, serif;
+  font-size: clamp(11px, 2.8cqi, 14px);
+  font-style: italic;
+  color: var(--book-ink-soft);
+}
+
+.page[data-spine="right"] .folio {
+  left: 7.5cqi;
+}
+
+.page[data-spine="left"] .folio {
+  right: 7.5cqi;
+}

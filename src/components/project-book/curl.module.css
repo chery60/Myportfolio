@@ -1,0 +1,96 @@
+/*
+ * The turning leaf: a chain of strips, each nested in the previous and hinged
+ * on its left edge. The root strip sits on the spine (spread layout) or the
+ * left edge (single layout); useCurlFrames writes every transform.
+ *
+ * Strips must never get overflow, opacity, filter or mask: any of those
+ * flattens preserve-3d (notably in Safari). Faces clip instead.
+ */
+
+.leaf {
+  --strip-w: calc(var(--page-w) / 8);
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  z-index: 2;
+  width: var(--strip-w);
+  transform-origin: 0 50%;
+  transform-style: preserve-3d;
+  will-change: transform;
+  pointer-events: none;
+}
+
+.leaf[data-layout="single"] {
+  left: 0;
+}
+
+.strip {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 100%;
+  width: 100%;
+  transform-origin: 0 50%;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* Faces overlap their neighbours by half a pixel each side so no seam shows. */
+.face {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -0.5px;
+  right: -0.5px;
+  overflow: hidden;
+  background: var(--book-paper);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.back {
+  transform: rotateY(180deg);
+}
+
+.slice {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(0.5px - var(--slice) * var(--strip-w));
+  width: var(--page-w);
+}
+
+.shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgb(28 18 8 / var(--sa, 0)), rgb(28 18 8 / var(--sb, 0)));
+}
+
+.glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: rgb(255 248 232);
+  opacity: 0;
+}
+
+/* The shadow the lifted leaf throws on the pages beneath it. */
+.gutter {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  z-index: 1;
+  width: 40%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(closest-side, rgb(30 20 10 / 0.34), transparent);
+}
+
+.gutter[data-layout="single"] {
+  left: 0;
+  width: 50%;
+}

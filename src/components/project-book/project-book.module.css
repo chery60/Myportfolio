@@ -1,0 +1,133 @@
+/*
+ * The book on its desk. Layout switches on the frame's own width (container
+ * query), not the viewport, using the same threshold as the JS layout
+ * (SPREAD_MIN_FRAME_WIDTH = 720px in src/lib/book/pages.ts). Server HTML always
+ * renders spread 1; on a narrow frame the container query hides its right page,
+ * which is exactly what the single-page layout shows after hydration.
+ */
+
+/* Wider than the 672px text column: centred on it, never wider than the viewport. */
+.breakout {
+  --book-width: min(960px, calc(100vw - 2rem));
+  width: var(--book-width);
+  margin-left: calc((100% - var(--book-width)) / 2);
+  margin-bottom: 2.5rem;
+}
+
+.book {
+  --book-paper: #ece7dc;
+  --book-ink: #2b2620;
+  --book-ink-soft: #5f584d;
+  --book-pencil: #2f4a8a;
+  --book-marker: #a4442a;
+  --book-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.36 0 0 0 0 0.28 0 0 0 0 0.17 0 0 0 0.07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+
+.frame {
+  container: book-frame / inline-size;
+}
+
+.desk {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(14px, 2.4cqi, 22px);
+  padding: clamp(16px, 4cqi, 40px) clamp(10px, 3.6cqi, 36px) clamp(14px, 2.6cqi, 26px);
+  border-radius: 20px;
+  background:
+    radial-gradient(120% 90% at 50% 0%, oklch(0.985 0.008 85), transparent 70%),
+    oklch(0.95 0.012 82);
+}
+
+:global(.dark) .desk {
+  background:
+    radial-gradient(120% 90% at 50% 0%, oklch(0.27 0.01 70), transparent 70%),
+    oklch(0.2 0.008 70);
+}
+
+.stage {
+  --page-w: calc(var(--stage-w, 888px) / 2);
+  --page-h: calc(var(--page-w) * 4 / 3);
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 100%;
+  width: min(100%, clamp(600px, (100svh - 11rem) * 1.5, 888px));
+  aspect-ratio: 3 / 2;
+  margin-inline: auto;
+  border-radius: 3px;
+  box-shadow:
+    0 34px 48px -30px rgb(30 20 10 / 0.6),
+    0 14px 22px -16px rgb(30 20 10 / 0.45);
+  perspective: calc(var(--page-w) * 5.5);
+  perspective-origin: 50% 45%;
+  touch-action: pan-y pinch-zoom;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  cursor: grab;
+}
+
+.stage:focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: 6px;
+}
+
+.stage[data-turning] {
+  cursor: grabbing;
+}
+
+.slot {
+  position: relative;
+  grid-row: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.slot[data-side="left"] {
+  grid-column: 1;
+}
+
+.slot[data-side="right"] {
+  grid-column: 2;
+}
+
+.slot[data-side="single"] {
+  grid-column: 1 / -1;
+}
+
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.caption {
+  min-height: 1.4em;
+  margin: 0;
+  padding-inline: 8px;
+  font-family: var(--font-book-display), Georgia, serif;
+  font-size: 16px;
+  font-style: italic;
+  line-height: 1.35;
+  text-align: center;
+  text-wrap: balance;
+  color: var(--muted-foreground);
+}
+
+@container book-frame (width < 720px) {
+  .stage {
+    --page-w: var(--stage-w, 358px);
+    grid-template-columns: 1fr;
+    width: min(100%, 480px);
+    aspect-ratio: 3 / 4;
+  }
+
+  .slot[data-side="right"] {
+    display: none;
+  }
+
+  .slot[data-side="left"] {
+    grid-column: 1 / -1;
+  }
+}
