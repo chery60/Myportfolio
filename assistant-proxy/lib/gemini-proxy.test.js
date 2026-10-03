@@ -282,6 +282,34 @@ describe("OPTIONS preflight", () => {
     assert.equal(response.status, 403);
     assert.equal(response.headers.get("access-control-allow-origin"), null);
   });
+
+  test("allows a local dev server on whatever port it landed on", () => {
+    const { proxy } = makeProxy({ allowedOrigins: DEFAULT_ALLOWED_ORIGINS });
+    for (const origin of [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "http://127.0.0.1:5173",
+    ]) {
+      const response = proxy.OPTIONS(makeRequest({ method: "OPTIONS", origin }));
+      assert.equal(response.status, 204, origin);
+      assert.equal(response.headers.get("access-control-allow-origin"), origin);
+    }
+  });
+
+  test("matches the any-port wildcard strictly, not as a prefix", () => {
+    const { proxy } = makeProxy({ allowedOrigins: DEFAULT_ALLOWED_ORIGINS });
+    for (const origin of [
+      "http://localhost:3001.evil.example",
+      "http://localhost:3001/",
+      "http://localhost:abc",
+      "http://localhost:",
+      "https://localhost:3001",
+      "http://localhost",
+    ]) {
+      const response = proxy.OPTIONS(makeRequest({ method: "OPTIONS", origin }));
+      assert.equal(response.status, 403, origin);
+    }
+  });
 });
 
 describe("POST", () => {

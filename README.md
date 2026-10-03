@@ -75,8 +75,9 @@ read. So the Gemini key lives in `assistant-proxy/`, a separate Vercel project
 with one function at `/api/v1beta/models/{model}:{method}`. It adds the key
 server-side and forwards only:
 
-- requests whose `Origin` is `https://chery60.github.io` or `http://localhost:3000`
-  (override with `ALLOWED_ORIGINS`),
+- requests whose `Origin` is `https://chery60.github.io`, or `localhost` /
+  `127.0.0.1` on any port for local dev (override with `ALLOWED_ORIGINS`; a
+  trailing `:*` means any port),
 - the `gemini-3.5-flash-lite` model, via `generateContent` or
   `streamGenerateContent`,
 - the request fields the assistant sends, with `maxOutputTokens` clamped to 400

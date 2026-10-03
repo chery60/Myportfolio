@@ -51,13 +51,40 @@ const MAX_LOGGED_ERROR_CHARS = 500;
 /** A reply is capped at 400 tokens, so a healthy stream finishes well inside this. */
 const UPSTREAM_TIMEOUT_MS = 30_000;
 
+/**
+ * A trailing `:*` allows that scheme and host on any port, because `next dev`
+ * moves to 3001, 3002… when 3000 is taken. Everything else matches exactly.
+ */
 export const DEFAULT_ALLOWED_ORIGINS = [
   "https://chery60.github.io",
-  "http://localhost:3000",
+  "http://localhost:*",
+  "http://127.0.0.1:*",
 ];
+const ANY_PORT_SUFFIX = ":*";
+const PORT_PATTERN = /^\d{1,5}$/;
 
 const PREFLIGHT_MAX_AGE_SECONDS = "86400";
 const SECURITY_HEADERS = { "X-Content-Type-Options": "nosniff" };
+
+function createOriginMatcher(allowedOrigins) {
+  const exact = new Set(
+    allowedOrigins.filter((origin) => !origin.endsWith(ANY_PORT_SUFFIX))
+  );
+  // "http://localhost:*" → "http://localhost:", which must be followed by a port only.
+  const anyPortPrefixes = allowedOrigins
+    .filter((origin) => origin.endsWith(ANY_PORT_SUFFIX))
+    .map((origin) => origin.slice(0, -1));
+
+  return (origin) => {
+    if (typeof origin !== "string") return false;
+    if (exact.has(origin)) return true;
+    return anyPortPrefixes.some(
+      (prefix) =>
+        origin.startsWith(prefix) &&
+        PORT_PATTERN.test(origin.slice(prefix.length))
+    );
+  };
+}
 
 export function parseAllowedOrigins(value) {
   if (!value) return DEFAULT_ALLOWED_ORIGINS;
@@ -203,7 +230,7 @@ export function createGeminiProxy({
   logError = console.error,
   upstreamTimeoutMs = UPSTREAM_TIMEOUT_MS,
 }) {
-  const origins = new Set(allowedOrigins);
+  const isAllowedOrigin = createOriginMatcher(allowedOrigins);
   const corsFor = (origin) => ({
     "Access-Control-Allow-Origin": origin,
     Vary: "Origin",
@@ -211,7 +238,7 @@ export function createGeminiProxy({
 
   function OPTIONS(request) {
     const origin = request.headers.get("origin");
-    if (!origins.has(origin)) {
+    if (!isAllowedOrigin(origin)) {
       return new Response(null, { status: 403, headers: SECURITY_HEADERS });
     }
     return new Response(null, {
@@ -266,7 +293,7 @@ export function createGeminiProxy({
 
   async function POST(request) {
     const origin = request.headers.get("origin");
-    if (!origins.has(origin)) {
+    if (!isAllowedOrigin(origin)) {
       return errorResponse(403, "This origin may not use the assistant.");
     }
     const cors = corsFor(origin);
