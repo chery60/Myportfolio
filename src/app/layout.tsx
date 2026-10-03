@@ -1,4 +1,5 @@
 import Navbar from "@/components/navbar";
+import PetChatLauncher from "@/components/pet-chat-launcher";
 import PetCursor from "@/components/pet-cursor";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -89,6 +90,7 @@ export default function RootLayout({
               {children}
             </div>
             <PetCursor />
+            <PetChatLauncher />
             <Navbar />
           </TooltipProvider>
         </ThemeProvider>

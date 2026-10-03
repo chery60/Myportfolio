@@ -15,6 +15,12 @@ const posts = defineCollection({
         author: z.string().optional(),
         summary: z.string(),
         image: z.string().optional(),
+        video: z.string().optional(),
+        videoPoster: z.string().optional(),
+        videoCaptions: z.string().optional(),
+        walkthroughId: z.string().optional(),
+        walkthroughPoster: z.string().optional(),
+        walkthroughDuration: z.string().optional(),
         content: z.string(),
     }),
     transform: async (document, context) => {

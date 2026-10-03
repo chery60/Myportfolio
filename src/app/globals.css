@@ -125,6 +125,577 @@
   }
 }
 
+/*
+ * Idle life for the parked pet.
+ *
+ * These only ever apply to the static (non-following) pet: `pet-cursor.tsx`
+ * writes `data-pet-idle` on the sprite wrapper in that branch alone, so a pet
+ * chasing the cursor is untouched. Every transform sits on its own wrapper
+ * element because the sprite div carries an inline `scaleX` for facing, which
+ * would otherwise override an animation.
+ */
+/*
+ * Breathing, ~15 cycles a minute.
+ *
+ * The inhale takes 45% of the loop and the exhale 55%, and the pet holds
+ * briefly at the top. A symmetric 0/50/100 scale — which is what this was —
+ * is the classic tell that something was tweened between two keyframes rather
+ * than animated. Amplitude stays near the edge of perceptible on purpose.
+ */
+@keyframes petIdleBreathe {
+  0% {
+    transform: scale(1, 1) translateY(0);
+  }
+
+  40% {
+    transform: scale(1.026, 0.976) translateY(0.4px);
+  }
+
+  48% {
+    transform: scale(1.028, 0.974) translateY(0.4px);
+  }
+
+  78% {
+    transform: scale(0.996, 1.006) translateY(-0.3px);
+  }
+
+  100% {
+    transform: scale(1, 1) translateY(0);
+  }
+}
+
+@keyframes petIdleDrowse {
+  0%,
+  100% {
+    transform: scale(1, 1);
+  }
+
+  50% {
+    transform: scale(1.02, 0.97);
+  }
+}
+
+/* Asleep: slower and deeper, with a longer hold at the top of the inhale. */
+@keyframes petIdleSleep {
+  0% {
+    transform: translateY(1px) scale(1, 1);
+  }
+
+  38% {
+    transform: translateY(2.2px) scale(1.038, 0.952);
+  }
+
+  56% {
+    transform: translateY(2.2px) scale(1.036, 0.954);
+  }
+
+  100% {
+    transform: translateY(1px) scale(1, 1);
+  }
+}
+
+/*
+ * Hop: anticipation, arc, impact, settle.
+ *
+ * The crouch at 12% is the anticipation — without a counter-movement first the
+ * pet appears to be yanked upward. It drifts sideways on the way so the path is
+ * an arc rather than a straight line, squashes on landing, then overshoots
+ * slightly and settles instead of stopping dead.
+ */
+@keyframes petIdleHop {
+  0% {
+    transform: translate(0, 0) scale(1, 1);
+  }
+
+  12% {
+    transform: translate(0, 2px) scale(1.05, 0.94);
+  }
+
+  30% {
+    transform: translate(-1px, -9px) scale(0.95, 1.07);
+  }
+
+  48% {
+    transform: translate(-1.5px, -10px) scale(0.97, 1.04);
+  }
+
+  68% {
+    transform: translate(0, 0) scale(1.07, 0.92);
+  }
+
+  84% {
+    transform: translate(0, -2px) scale(0.99, 1.02);
+  }
+
+  100% {
+    transform: translate(0, 0) scale(1, 1);
+  }
+}
+
+@keyframes petIdleWiggle {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  20% {
+    transform: rotate(-8deg);
+  }
+
+  50% {
+    transform: rotate(7deg);
+  }
+
+  78% {
+    transform: rotate(-4deg);
+  }
+}
+
+@keyframes petIdleStretch {
+  0%,
+  100% {
+    transform: scale(1, 1) translateY(0);
+  }
+
+  35% {
+    transform: scale(0.94, 1.09) translateY(-3px);
+  }
+
+  70% {
+    transform: scale(1.07, 0.93) translateY(0);
+  }
+}
+
+@keyframes petIdleStartle {
+  0% {
+    transform: translateY(0) scale(1, 1);
+  }
+
+  30% {
+    transform: translateY(-11px) scale(0.93, 1.1);
+  }
+
+  60% {
+    transform: translateY(0) scale(1.08, 0.92);
+  }
+
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+}
+
+@keyframes petZzz {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.6) rotate(-8deg);
+  }
+
+  18% {
+    opacity: 0.85;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(11px, -20px) scale(1.05) rotate(10deg);
+  }
+}
+
+/* Both layers grow from the feet, so squash-and-stretch stays grounded. */
+[data-pet-idle],
+[data-pet-pose] {
+  transform-origin: center bottom;
+}
+
+/*
+ * The tilt sits on its own layer and is transitioned, not animated: a property
+ * cannot be both, and animating it alongside the breathing loop would snap the
+ * pet from upright to tilted the instant it nodded off.
+ */
+[data-pet-pose] {
+  transition: transform 700ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+[data-pet-pose="awake"] {
+  transform: rotate(0deg);
+}
+
+[data-pet-pose="drowsy"] {
+  transform: rotate(-2.5deg);
+}
+
+[data-pet-pose="asleep"] {
+  transform: rotate(-7deg);
+}
+
+[data-pet-idle="awake"] {
+  animation: petIdleBreathe 4.2s ease-in-out infinite;
+}
+
+[data-pet-idle="drowsy"] {
+  animation: petIdleDrowse 5.4s ease-in-out infinite;
+}
+
+[data-pet-idle="asleep"] {
+  animation: petIdleSleep 6.4s ease-in-out infinite;
+}
+
+/* A one-shot gesture takes over from the breathing loop for its duration. */
+[data-pet-gesture="hop"] {
+  animation: petIdleHop 0.62s cubic-bezier(0.3, 0.9, 0.4, 1) 1;
+}
+
+[data-pet-gesture="wiggle"] {
+  animation: petIdleWiggle 0.9s ease-in-out 1;
+}
+
+[data-pet-gesture="stretch"] {
+  animation: petIdleStretch 1.1s ease-in-out 1;
+}
+
+[data-pet-gesture="startle"] {
+  animation: petIdleStartle 0.52s cubic-bezier(0.25, 1.2, 0.4, 1) 1;
+}
+
+/*
+ * Care reactions use the same animation grammar as the idle gestures: a small
+ * anticipation, a readable main action, then a damped settle. The food/water
+ * prop travels on a separate layer so the pet can meet it halfway.
+ */
+@keyframes petCareEat {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg) scale(1, 1);
+  }
+
+  14% {
+    transform: translate(1px, 2px) rotate(3deg) scale(1.04, 0.96);
+  }
+
+  32% {
+    transform: translate(-4px, -1px) rotate(-6deg) scale(0.98, 1.03);
+  }
+
+  48%,
+  66%,
+  82% {
+    transform: translate(-2px, 0) rotate(-2deg) scale(1.045, 0.955);
+  }
+
+  57%,
+  74% {
+    transform: translate(-2px, -1px) rotate(2deg) scale(0.985, 1.025);
+  }
+
+  92% {
+    transform: translate(0, -3px) rotate(0deg) scale(0.98, 1.03);
+  }
+}
+
+@keyframes petCareDrink {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg) scale(1, 1);
+  }
+
+  16% {
+    transform: translateY(2px) rotate(-2deg) scale(1.03, 0.97);
+  }
+
+  34% {
+    transform: translateY(3px) rotate(5deg) scale(1.02, 0.98);
+  }
+
+  48%,
+  64%,
+  80% {
+    transform: translateY(4px) rotate(5deg) scale(1.035, 0.965);
+  }
+
+  56%,
+  72% {
+    transform: translateY(2px) rotate(3deg) scale(0.99, 1.015);
+  }
+
+  91% {
+    transform: translateY(-3px) rotate(-2deg) scale(0.98, 1.04);
+  }
+}
+
+@keyframes petCarePlay {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg) scale(1, 1);
+  }
+
+  12% {
+    transform: translateY(3px) rotate(-5deg) scale(1.08, 0.91);
+  }
+
+  38% {
+    transform: translateY(-14px) rotate(13deg) scale(0.93, 1.08);
+  }
+
+  60% {
+    transform: translateY(-9px) rotate(-10deg) scale(0.97, 1.04);
+  }
+
+  78% {
+    transform: translateY(1px) rotate(3deg) scale(1.09, 0.91);
+  }
+
+  91% {
+    transform: translateY(-2px) rotate(-1deg) scale(0.985, 1.02);
+  }
+}
+
+@keyframes petCrewmateFlip {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg) scale(1, 1);
+  }
+
+  12% {
+    transform: translateY(3px) rotate(-8deg) scale(1.09, 0.9);
+  }
+
+  32% {
+    transform: translateY(-13px) rotate(92deg) scale(0.94, 1.07);
+  }
+
+  54% {
+    transform: translateY(-17px) rotate(214deg) scale(0.96, 1.05);
+  }
+
+  73% {
+    transform: translateY(-7px) rotate(326deg) scale(0.98, 1.02);
+  }
+
+  82% {
+    transform: translateY(1px) rotate(360deg) scale(1.1, 0.9);
+  }
+
+  92% {
+    transform: translateY(-2px) rotate(360deg) scale(0.985, 1.025);
+  }
+}
+
+[data-pet-reaction="eat"] {
+  animation: petCareEat 1.65s cubic-bezier(0.33, 0, 0.2, 1) 1;
+}
+
+[data-pet-reaction="drink"] {
+  animation: petCareDrink 1.7s cubic-bezier(0.33, 0, 0.2, 1) 1;
+}
+
+[data-pet-reaction="play"] {
+  animation: petCarePlay 1.35s cubic-bezier(0.25, 0.8, 0.3, 1) 1;
+}
+
+[data-selected-pet="among-us"] [data-pet-reaction="play"] {
+  animation-name: petCrewmateFlip;
+}
+
+@keyframes petTreatTravel {
+  0% {
+    opacity: 0;
+    transform: translate(-28px, 8px) rotate(-20deg) scale(0.65);
+  }
+
+  14% {
+    opacity: 1;
+  }
+
+  58% {
+    opacity: 1;
+    transform: translate(22px, -7px) rotate(10deg) scale(1);
+  }
+
+  72%,
+  100% {
+    opacity: 0;
+    transform: translate(32px, -4px) rotate(18deg) scale(0.18);
+  }
+}
+
+@keyframes petWaterDrop {
+  0% {
+    opacity: 0;
+    transform: translateY(-22px) scale(0.55);
+  }
+
+  16% {
+    opacity: 1;
+  }
+
+  64% {
+    opacity: 1;
+    transform: translateY(16px) scale(1);
+  }
+
+  82%,
+  100% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.3);
+  }
+}
+
+[data-pet-care-item="eat"] {
+  bottom: 28px;
+  left: 2px;
+  font-size: 21px;
+  animation: petTreatTravel 1.4s cubic-bezier(0.2, 0.7, 0.25, 1) forwards;
+}
+
+[data-pet-care-item="drink"] {
+  top: 4px;
+  left: 33px;
+  font-size: 19px;
+  animation: petWaterDrop 1.35s cubic-bezier(0.2, 0.7, 0.25, 1) forwards;
+}
+
+@keyframes petPlaySparkle {
+  0% {
+    opacity: 0;
+    transform: translate(0, 4px) scale(0.3) rotate(-14deg);
+  }
+
+  24% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(var(--spark-x), var(--spark-y)) scale(1.2) rotate(18deg);
+  }
+}
+
+[data-pet-play-sparkles] > span {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  color: #f59e0b;
+  font-size: 13px;
+  animation: petPlaySparkle 0.9s ease-out forwards;
+}
+
+[data-pet-play-sparkles] > span:nth-child(1) {
+  --spark-x: -30px;
+  --spark-y: -31px;
+}
+
+[data-pet-play-sparkles] > span:nth-child(2) {
+  --spark-x: 25px;
+  --spark-y: -39px;
+  color: #fb7185;
+  animation-delay: 0.16s;
+}
+
+[data-pet-play-sparkles] > span:nth-child(3) {
+  --spark-x: 34px;
+  --spark-y: -13px;
+  animation-delay: 0.32s;
+}
+
+/*
+ * Eyelids.
+ *
+ * Driven entirely by an ancestor's `data-pet-eyes`, so `PetArtwork` needs no
+ * props and the pets rendered outside the cursor — the selector grid, the chat
+ * avatar, the mobile greeting — never blink or sleep.
+ *
+ * The asymmetric blink falls out of putting the duration on the *target* state
+ * rather than the element: closing uses 83ms, opening 125ms. A blink that opens
+ * as fast as it closes reads as a twitch.
+ */
+[data-pet-lid] {
+  transform: translateY(-100%);
+  transition: transform 125ms cubic-bezier(0.33, 0, 0.67, 1);
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.45);
+  will-change: transform;
+}
+
+[data-pet-eye-line] {
+  opacity: 0;
+  transition: opacity 70ms ease-out;
+}
+
+[data-pet-eyes="closed"] [data-pet-lid] {
+  transform: translateY(0);
+  transition-duration: 83ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
+}
+
+[data-pet-eyes="closed"] [data-pet-eye-line] {
+  opacity: 1;
+}
+
+[data-pet-eyes="half"] [data-pet-lid] {
+  transform: translateY(-48%);
+  transition-duration: 220ms;
+}
+
+/*
+ * The shadow is what sells the weight: it tightens and fades as the pet lifts
+ * off, on the same timing as the hop, and breathes with it the rest of the
+ * time. Only ever applied to the parked pet — in follow mode the flight code
+ * owns this element and writes to it directly.
+ */
+[data-pet-idle="awake"] [data-pet-shadow] {
+  animation: petShadowBreathe 4.2s ease-in-out infinite;
+}
+
+[data-pet-idle="asleep"] [data-pet-shadow] {
+  animation: petShadowBreathe 6.4s ease-in-out infinite;
+}
+
+[data-pet-gesture="hop"] [data-pet-shadow] {
+  animation: petShadowHop 0.62s cubic-bezier(0.3, 0.9, 0.4, 1) 1;
+}
+
+@keyframes petShadowBreathe {
+  0%,
+  100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+
+  44% {
+    transform: translateX(-50%) scale(0.97);
+    opacity: 0.88;
+  }
+}
+
+@keyframes petShadowHop {
+  0% {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+
+  12% {
+    transform: translateX(-50%) scale(1.06);
+    opacity: 1;
+  }
+
+  44% {
+    transform: translateX(-50%) scale(0.72);
+    opacity: 0.45;
+  }
+
+  68% {
+    transform: translateX(-50%) scale(1.08);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+}
+
+[data-pet-zzz] {
+  animation: petZzz 2.8s ease-out infinite;
+}
+
 .animate-pet-foot-left {
   animation: petFootLeft 0.25s infinite linear;
 }
@@ -141,8 +712,28 @@
   .animate-pet-foot-left,
   .animate-pet-foot-right,
   .animate-pet-bob,
-  [data-flight-particle] {
+  [data-flight-particle],
+  [data-pet-idle],
+  [data-pet-gesture],
+  [data-pet-zzz],
+  [data-pet-reaction],
+  [data-pet-care-item],
+  [data-pet-play-sparkles] > span,
+  [data-pet-idle] [data-pet-shadow],
+  [data-pet-gesture] [data-pet-shadow] {
     animation: none;
+  }
+
+  /* Closed eyes say "asleep" the same way the tilt does, so the lids keep
+     their position and simply stop animating into it. */
+  [data-pet-lid] {
+    transition: none;
+  }
+
+  /* The sleep pose is information, not decoration, so the tilt stays — it
+     just arrives instantly instead of easing. */
+  [data-pet-pose] {
+    transition: none;
   }
 }
 

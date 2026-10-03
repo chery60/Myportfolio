@@ -1,0 +1,9 @@
+{
+  "name": "myportfolio-assistant-proxy",
+  "private": true,
+  "type": "module",
+  "description": "Holds the Gemini key server-side for the portfolio's pet assistant.",
+  "scripts": {
+    "test": "node --test"
+  }
+}

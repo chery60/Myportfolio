@@ -5,21 +5,28 @@ updatedAt: "2026-08-09"
 author: "Sai Charan Kalla"
 summary: "Guest self-ordering kiosk case study covering problem discovery, user goals, personas, journeys, data shape, task flows, and prototype handoff."
 image: "/project-symphony-kiosk.png"
+video: "/case-studies/symphony-kiosk/00-explainer.mp4"
+videoPoster: "/case-studies/symphony-kiosk/00-explainer.jpg"
+walkthroughId: "uKQQbFIGt-c"
+walkthroughPoster: "/case-studies/symphony-kiosk/00-walkthrough-poster.jpg"
+walkthroughDuration: "4:13"
 ---
 
 export const withBasePath = (path) => ((process.env.GITHUB_PAGES === "true" ? "/" + (process.env.GITHUB_PAGES_REPOSITORY || "Myportfolio") : process.env.NEXT_PUBLIC_BASE_PATH) || "") + path;
 
-> Guest self-ordering within the restaurant.
-
 <div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
   <img src={withBasePath("/case-studies/symphony-kiosk/01-kiosk.png")} alt="Symphony Kiosk hero image" className="h-auto w-full" />
 </div>
+
+> Guest self-ordering within the restaurant.
 
 ---
 
 ## Introduction
 
 Oracle’s Food and Beverage Global Business Unit provides a comprehensive suite of enterprise software solutions designed for various restaurant types, including quick-service restaurants (QSRs), fast casuals, limited service restaurants, and stadiums. Our current system connects the Enterprise Management Console (EMC), Point of Sale (POS), and Kitchen Display System (KDS) to create a seamless food ordering experience. However, we’ve identified a gap in the ordering process, particularly for QSRs and similar venues. To address this, we’re introducing a new entity—the kiosk. This solution is aimed at increasing orders, influencing consumer buying behavior, and driving higher engagement.
+
+<ProjectVideo />
 
 ## Back Story
 

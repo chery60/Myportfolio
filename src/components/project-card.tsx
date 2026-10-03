@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn, withBasePath } from "@/lib/utils";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Markdown from "react-markdown";
 
 function ProjectImage({ src, alt }: { src: string; alt: string }) {
@@ -22,6 +22,131 @@ function ProjectImage({ src, alt }: { src: string; alt: string }) {
       className="w-full h-48 object-cover"
       onError={() => setImageError(true)}
     />
+  );
+}
+
+const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+// Reels play on hover only, so a device without a real pointer never plays one.
+// This also stops a stray touch during a scroll from starting a video.
+const HOVER_QUERY = "(hover: hover)";
+
+function prefersLessData() {
+  const connection = (
+    navigator as Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string };
+    }
+  ).connection;
+
+  if (!connection) {
+    return false;
+  }
+
+  return (
+    connection.saveData === true ||
+    /^(slow-)?2g$/.test(connection.effectiveType ?? "")
+  );
+}
+
+/**
+ * The card's thumbnail, with the reel layered over it and revealed only while
+ * the card is hovered or keyboard-focused.
+ *
+ * The still is always in the DOM underneath, so "not playing" is a real image
+ * rather than a paused video frame — which matters here because every reel
+ * opens and closes on blank white to make its loop seamless. Pausing and
+ * resetting a video would show that white frame; the still never does.
+ */
+function ProjectReel({
+  src,
+  poster,
+  alt,
+  active,
+}: {
+  src: string;
+  poster?: string;
+  alt: string;
+  active: boolean;
+}) {
+  const ref = useRef<HTMLVideoElement>(null);
+  const [failed, setFailed] = useState(false);
+  // Reduced motion, a metered connection, or a device with no hover: still only.
+  const [blocked, setBlocked] = useState(false);
+  // Only fade the reel in once it is genuinely playing, so the blank first
+  // frame never flashes over the thumbnail.
+  const [showing, setShowing] = useState(false);
+
+  // Environment is read after mount so the first client render still matches
+  // the server's markup.
+  useEffect(() => {
+    const motion = window.matchMedia(REDUCED_MOTION_QUERY);
+    const hover = window.matchMedia(HOVER_QUERY);
+    const update = () =>
+      setBlocked(motion.matches || !hover.matches || prefersLessData());
+
+    update();
+    motion.addEventListener("change", update);
+    hover.addEventListener("change", update);
+    return () => {
+      motion.removeEventListener("change", update);
+      hover.removeEventListener("change", update);
+    };
+  }, []);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || failed || blocked) {
+      return;
+    }
+
+    if (active) {
+      // Nothing is fetched until the first hover.
+      if (el.preload !== "auto") {
+        el.preload = "auto";
+      }
+      // React can drop the `muted` attribute from server-rendered markup, and
+      // iOS refuses to start an unmuted video from script.
+      el.muted = true;
+      el.play().catch((error: DOMException) => {
+        // AbortError = the pointer left mid-load. NotAllowedError = autoplay
+        // policy. Neither means the file is broken.
+        if (error?.name !== "AbortError" && error?.name !== "NotAllowedError") {
+          setFailed(true);
+        }
+      });
+      return;
+    }
+
+    // `onPause` clears `showing` — driving it from the element's own event keeps
+    // this effect free of state updates.
+    el.pause();
+    el.currentTime = 0;
+  }, [active, failed, blocked]);
+
+  const showReel = Boolean(src) && !failed && !blocked;
+
+  return (
+    <>
+      <ProjectImage src={poster ?? ""} alt={alt} />
+      {showReel && (
+        <video
+          ref={ref}
+          src={withBasePath(src)}
+          loop
+          muted
+          playsInline
+          preload="none"
+          disableRemotePlayback
+          aria-hidden="true"
+          className={cn(
+            "absolute inset-0 w-full h-48 object-cover transition-opacity duration-200",
+            showing ? "opacity-100" : "opacity-0"
+          )}
+          onPlaying={() => setShowing(true)}
+          onPause={() => setShowing(false)}
+          onError={() => setFailed(true)}
+        />
+      )}
+    </>
   );
 }
 
@@ -54,12 +179,19 @@ export function ProjectCard({
 }: Props) {
   const projectHref = href || "#";
   const isExternalProject = /^https?:\/\//.test(projectHref);
+  // Hovering anywhere on the card plays its reel — not just the media box.
+  // Focus is wired up too, so the reel is reachable by keyboard.
+  const [active, setActive] = useState(false);
 
   return (
     <Link
       href={projectHref}
       target={isExternalProject ? "_blank" : undefined}
       rel={isExternalProject ? "noopener noreferrer" : undefined}
+      onPointerEnter={() => setActive(true)}
+      onPointerLeave={() => setActive(false)}
+      onFocus={() => setActive(true)}
+      onBlur={() => setActive(false)}
       className={cn(
         "group flex flex-col h-full border border-border rounded-xl overflow-hidden hover:ring-2 cursor-pointer hover:ring-muted transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         className
@@ -68,14 +200,7 @@ export function ProjectCard({
     >
       <div className="relative shrink-0">
         {video ? (
-          <video
-            src={withBasePath(video)}
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-48 object-cover"
-          />
+          <ProjectReel src={video} poster={image} alt={title} active={active} />
         ) : image ? (
           <ProjectImage src={image} alt={title} />
         ) : (

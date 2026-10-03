@@ -220,7 +220,7 @@ export const DATA = {
         },
       ],
       image: "/project-ai-unit-planning.png",
-      video: "",
+      video: "/project-ai-unit-planning-reel.mp4",
     },
     {
       title: "Symphony Kiosk",
@@ -245,7 +245,7 @@ export const DATA = {
         },
       ],
       image: "/project-symphony-kiosk.png",
-      video: "",
+      video: "/project-symphony-kiosk-reel.mp4",
     },
     {
       title: "Companies Platform",
@@ -270,7 +270,7 @@ export const DATA = {
         },
       ],
       image: "/project-companies-platform.png",
-      video: "",
+      video: "/project-companies-platform-reel.mp4",
     },
     {
       title: "User Management",
@@ -295,7 +295,7 @@ export const DATA = {
         },
       ],
       image: "/project-user-management.png",
-      video: "",
+      video: "/project-user-management-reel.mp4",
     },
     {
       title: "Educator Platform",
@@ -320,7 +320,7 @@ export const DATA = {
         },
       ],
       image: "/project-educator-platform.png",
-      video: "",
+      video: "/project-educator-platform-reel.mp4",
     },
   ],
   hackathons: [

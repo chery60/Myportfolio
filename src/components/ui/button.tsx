@@ -25,6 +25,12 @@ const buttonVariants = cva(
         sm: "h-8 rounded-md px-3 text-xs",
         lg: "h-10 rounded-md px-8",
         icon: "h-9 w-9 rounded-full",
+        // Added for the AI Elements components, which expect the newer shadcn
+        // size scale. Purely additive — the variants above are untouched so the
+        // navbar dock and copy buttons keep their existing look.
+        "icon-xs": "size-6 rounded-md [&_svg:not([class*='size-'])]:size-3",
+        "icon-sm": "size-8 rounded-md",
+        "icon-lg": "size-10 rounded-md",
       },
     },
     defaultVariants: {

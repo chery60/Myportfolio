@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type ReactNode,
 } from "react";
 import {
   getPetById,
@@ -17,6 +18,29 @@ import {
   usePetFollowCursor,
   useSelectedPet,
 } from "@/components/use-selected-pet";
+import {
+  PET_BUBBLE_OFFSET_BOTTOM,
+  PET_PARK_OFFSET_BOTTOM,
+  PET_PARK_OFFSET_RIGHT,
+  usePetParked,
+} from "@/components/use-pet-parked";
+import {
+  togglePetChat,
+  usePetChatOpen,
+} from "@/components/use-pet-chat";
+import {
+  usePetCare,
+  type PetTreat,
+} from "@/components/use-pet-care";
+import { usePetIdle } from "@/components/use-pet-idle";
+import { FIRST_NAME } from "@/lib/assistant-persona";
+import {
+  AppleIcon,
+  DropletsIcon,
+  MessageCircleIcon,
+  SparklesIcon,
+  XIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Point = {
@@ -183,6 +207,7 @@ function createFlight(
 }
 
 export default function PetCursor() {
+  const chatOpen = usePetChatOpen();
   const characterRef = useRef<HTMLDivElement>(null);
   const spriteRef = useRef<HTMLDivElement>(null);
   const birdImageRef = useRef<HTMLImageElement>(null);
@@ -199,14 +224,26 @@ export default function PetCursor() {
   const movingRef = useRef(false);
   const visibleRef = useRef(false);
   const reducedMotionRef = useRef(false);
+  const parkedRef = useRef(false);
   const selectedPet = useSelectedPet();
   const followCursor = usePetFollowCursor();
+  const parked = usePetParked();
   const movementType = getPetById(selectedPet).movementType;
   const selectedPetRef = useRef<PetId>(selectedPet);
   const movementTypeRef = useRef<MovementType>(movementType);
   const usesDepthFlight =
     movementType === "fly" && !DEPTH_FLIGHT_EXCLUDED_PETS.has(selectedPet);
   const [isEnabled, setIsEnabled] = useState(false);
+  const [careMenuOpen, setCareMenuOpen] = useState(false);
+  const careEnabled = isEnabled && !followCursor && !parked && !chatOpen;
+  const care = usePetCare(careEnabled);
+  // Idle life belongs to the parked pet only — a pet chasing the cursor is
+  // already expressing itself through the walk/flight machine.
+  const {
+    phase: idlePhase,
+    gesture: idleGesture,
+    eyes: idleEyes,
+  } = usePetIdle(careEnabled && !careMenuOpen && !care.reaction);
   const [isVisible, setIsVisible] = useState(false);
   const [isMoving, setIsMoving] = useState(false);
   const [flightPhase, setFlightPhase] = useState<FlightPhase>("idle");
@@ -229,6 +266,80 @@ export default function PetCursor() {
     selectedPetRef.current = selectedPet;
     movementTypeRef.current = movementType;
   }, [movementType, selectedPet]);
+
+  useEffect(() => {
+    if (!followCursor && !parked && !chatOpen) return;
+    const frame = window.requestAnimationFrame(() => setCareMenuOpen(false));
+    return () => window.cancelAnimationFrame(frame);
+  }, [chatOpen, followCursor, parked]);
+
+  useEffect(() => {
+    if (!careMenuOpen) return;
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setCareMenuOpen(false);
+    };
+    const closeOnOutsideClick = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (target.closest("[data-pet-care-ui]")) return;
+      setCareMenuOpen(false);
+    };
+
+    document.addEventListener("keydown", closeOnEscape);
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    return () => {
+      document.removeEventListener("keydown", closeOnEscape);
+      document.removeEventListener("pointerdown", closeOnOutsideClick);
+    };
+  }, [careMenuOpen]);
+
+  /**
+   * While the pet is speaking it parks in the bottom-right corner so the bubble
+   * is a stationary click target instead of one that chases the cursor.
+   *
+   * This only overrides the *target*; the existing walk/fly state machine does
+   * the travelling, so a walker walks over and a flyer flies over. It is kept
+   * out of the main rAF effect's dependencies on purpose — re-running that
+   * effect tears down the loop and snaps the pet back to its entry position.
+   *
+   * The park point deliberately skips `clampTarget`, whose `y` ceiling of
+   * `innerHeight - 74` would leave the pet floating 50px above where the static
+   * pet sits, visually detached from its own bubble.
+   */
+  useEffect(() => {
+    parkedRef.current = parked;
+
+    if (!parked || !followCursor || !isEnabled) {
+      return;
+    }
+
+    const parkTarget = () => {
+      const point = {
+        x: window.innerWidth - PET_PARK_OFFSET_RIGHT,
+        y: window.innerHeight - PET_PARK_OFFSET_BOTTOM,
+      };
+      targetRef.current = point;
+
+      // In follow mode the pet stays hidden until the first pointer move. If
+      // the greeting parks it before the visitor has moved the mouse, drop it
+      // in at the park point so it is actually there to do the talking.
+      if (!visibleRef.current) {
+        positionRef.current = point;
+        if (characterRef.current) {
+          characterRef.current.style.transform = `translate3d(${Math.round(
+            point.x
+          )}px, ${Math.round(point.y)}px, 0)`;
+        }
+        visibleRef.current = true;
+        setIsVisible(true);
+      }
+    };
+
+    parkTarget();
+    window.addEventListener("resize", parkTarget);
+    return () => window.removeEventListener("resize", parkTarget);
+  }, [followCursor, isEnabled, parked]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia(DESKTOP_POINTER_QUERY);
@@ -587,6 +698,11 @@ export default function PetCursor() {
         return;
       }
 
+      // Parked: the park effect owns the target until the pet stops speaking.
+      if (parkedRef.current) {
+        return;
+      }
+
       const nextTarget = clampTarget({
         x: event.clientX,
         y: event.clientY + POINTER_OFFSET_Y,
@@ -839,6 +955,22 @@ export default function PetCursor() {
     return null;
   }
 
+  // In follow mode the pet is never idle — the walk/flight machine owns it, so
+  // the attributes are dropped entirely rather than pinned to "awake". Leaving
+  // them on would keep the breathing loop running underneath the flight
+  // transforms, which is exactly the motion follow mode is not supposed to have.
+  const isReacting = Boolean(care.reaction);
+  const idlePose = followCursor || isReacting ? undefined : idlePhase;
+  const idleGestureAttr = followCursor || isReacting ? undefined : idleGesture;
+  const idleEyesAttr = followCursor || isReacting ? undefined : idleEyes;
+  const isAsleep = !followCursor && !isReacting && idlePhase === "asleep";
+  // `parked` is true whenever the walkthrough greeting or the chat panel is
+  // using this corner. Two bubbles stacked on one pet is nonsense, and the
+  // sleep note is the least important of the three, so it yields.
+  const showCareRequest = Boolean(care.need) && !careMenuOpen && !isAsleep;
+  const showCareFeedback = Boolean(care.feedback) && !careMenuOpen;
+  const showSleepNote =
+    isAsleep && !parked && !chatOpen && !careMenuOpen && !care.feedback;
   const activeFlightPhase = followCursor ? flightPhase : "idle";
   const activeWalking = followCursor && movementType === "walk" && isMoving;
   const activeFlying = followCursor && movementType === "fly" && isMoving;
@@ -854,6 +986,94 @@ export default function PetCursor() {
             <FlightParticleView key={particle.id} particle={particle} />
           ))}
         </div>
+      ) : null}
+      {showCareFeedback ? (
+        <PetSpeechBubble>{care.feedback}</PetSpeechBubble>
+      ) : showCareRequest ? (
+        <PetSpeechBubble interactive>
+          <span>
+            {care.need === "food"
+              ? "Tiny snack break? Pick me something good."
+              : "I could use a little water."}
+          </span>
+          <button
+            type="button"
+            data-pet-care-ui
+            className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-foreground px-2.5 py-1 text-[11px] font-medium text-background transition-transform hover:scale-[1.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            onClick={() => setCareMenuOpen(true)}
+          >
+            {care.need === "food" ? (
+              <AppleIcon className="size-3" />
+            ) : (
+              <DropletsIcon className="size-3" />
+            )}
+            {care.need === "food" ? "Choose a treat" : "Give water"}
+          </button>
+        </PetSpeechBubble>
+      ) : showSleepNote ? (
+        <PetSpeechBubble>Shh&hellip; tiny power nap.</PetSpeechBubble>
+      ) : null}
+
+      {careMenuOpen && !parked ? (
+        <PetCareMenu
+          need={care.need}
+          busy={isReacting}
+          onClose={() => setCareMenuOpen(false)}
+          onFeed={(treat) => {
+            care.feed(treat);
+            setCareMenuOpen(false);
+          }}
+          onWater={() => {
+            care.giveWater();
+            setCareMenuOpen(false);
+          }}
+          onPlay={() => {
+            care.play();
+            setCareMenuOpen(false);
+          }}
+          onChat={() => {
+            setCareMenuOpen(false);
+            togglePetChat();
+          }}
+        />
+      ) : null}
+
+      {/*
+        Static mode only: the parked pet doubles as the assistant's call button.
+
+        It is a sibling that covers the sprite's exact 76px box rather than the
+        sprite itself, so the sprite keeps `aria-hidden` and `pointer-events-none`
+        and the follow-cursor rAF loop is untouched. In follow mode this is not
+        rendered at all — a pet that tracks the cursor would swallow clicks on
+        every link underneath it — and `PetChatLauncher` puts a corner button up
+        instead. Rendered before the sprite so `peer-*` can drive the hover lift.
+      */}
+      {!followCursor ? (
+        <button
+          type="button"
+          data-pet-care-ui
+          onClick={() => setCareMenuOpen((open) => !open)}
+          aria-haspopup="menu"
+          aria-expanded={careMenuOpen}
+          aria-label={`Care for ${getPetById(selectedPet).name}`}
+          className={cn(
+            "peer fixed bottom-6 right-6 z-30 size-[76px] cursor-pointer rounded-full",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            "focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          )}
+        >
+          <span
+            aria-hidden="true"
+            className={cn(
+              "absolute right-0 top-1 grid size-5 place-items-center rounded-full border bg-card shadow-sm transition-colors",
+              care.need
+                ? "border-amber-400/70 text-amber-600 dark:text-amber-300"
+                : "border-border text-muted-foreground"
+            )}
+          >
+            <SparklesIcon className="size-3" />
+          </span>
+        </button>
       ) : null}
       <div
         ref={characterRef}
@@ -871,7 +1091,7 @@ export default function PetCursor() {
           "fixed z-20 h-[76px] w-[76px] pointer-events-none select-none transition-opacity duration-150",
           followCursor
             ? "left-0 top-0 -ml-[38px] -mt-[76px] will-change-transform"
-            : "bottom-6 right-6"
+            : "bottom-6 right-6 motion-safe:transition-transform motion-safe:peer-hover:-translate-y-1 motion-safe:peer-focus-visible:-translate-y-1"
         )}
         style={
           followCursor
@@ -883,15 +1103,238 @@ export default function PetCursor() {
         }
       >
         <div ref={spriteRef} style={{ transform: "scaleX(1)" }}>
-          <PetArtwork
-            petId={selectedPet}
-            moving={activeWalking}
-            imageRef={birdImageRef}
-            shadowRef={birdShadowRef}
-          />
+          {/*
+            Two wrappers, not one. The sprite div above owns an inline
+            `scaleX` for facing, so an animation there would be overridden;
+            and the sleep tilt has to be a *transition* while the breathing is
+            an *animation*, which the same property on one element cannot be.
+            So: pose (tilt) outside, breath and gestures inside.
+          */}
+          <div data-pet-pose={idlePose} data-pet-eyes={idleEyesAttr}>
+            <div
+              data-pet-idle={idlePose}
+              data-pet-gesture={idleGestureAttr}
+              data-pet-reaction={care.reaction ?? undefined}
+            >
+              <PetArtwork
+                petId={selectedPet}
+                moving={activeWalking}
+                imageRef={birdImageRef}
+                shadowRef={birdShadowRef}
+              />
+            </div>
+          </div>
+
+          {care.reaction ? (
+            <PetCareReactionItem reaction={care.reaction} treat={care.treat} />
+          ) : null}
+
+          {/* Two drifting Z's, offset so they never travel as a pair. */}
+          {isAsleep ? (
+            <span
+              aria-hidden="true"
+              // Anchored above the pet's head rather than its right edge: the
+              // pet parks 24px from the viewport edge, so Z's drifting up and
+              // to the right from there would be clipped off-screen.
+              className="pointer-events-none absolute left-1/2 top-0 select-none text-xs font-semibold text-muted-foreground"
+            >
+              <span data-pet-zzz className="absolute">
+                z
+              </span>
+              <span
+                data-pet-zzz
+                className="absolute text-[15px]"
+                style={{ animationDelay: "1.1s" }}
+              >
+                Z
+              </span>
+            </span>
+          ) : null}
         </div>
       </div>
     </>
+  );
+}
+
+function PetSpeechBubble({
+  children,
+  interactive = false,
+}: {
+  children: ReactNode;
+  interactive?: boolean;
+}) {
+  return (
+    <div
+      role={interactive ? "group" : "status"}
+      aria-label={interactive ? "Pet request" : undefined}
+      data-pet-care-ui={interactive || undefined}
+      className={cn(
+        "not-prose fixed right-4 z-30 max-w-[min(15rem,calc(100vw-2rem))] sm:right-6",
+        interactive ? "pointer-events-auto" : "pointer-events-none",
+        "motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-1 motion-safe:duration-500"
+      )}
+      style={{ bottom: PET_BUBBLE_OFFSET_BOTTOM }}
+    >
+      <div className="relative rounded-2xl border border-border/70 bg-card/95 px-3 py-2.5 text-card-foreground shadow-[0_18px_50px_-28px_rgba(0,0,0,0.55)] backdrop-blur-md">
+        <div className="text-xs leading-snug">{children}</div>
+        <span
+          aria-hidden="true"
+          className="absolute -bottom-[6px] right-7 size-2.5 rotate-45 border-b border-r border-border/70 bg-card"
+        />
+      </div>
+    </div>
+  );
+}
+
+function PetCareMenu({
+  need,
+  busy,
+  onClose,
+  onFeed,
+  onWater,
+  onPlay,
+  onChat,
+}: {
+  need: "food" | "water" | null;
+  busy: boolean;
+  onClose: () => void;
+  onFeed: (treat: PetTreat) => void;
+  onWater: () => void;
+  onPlay: () => void;
+  onChat: () => void;
+}) {
+  const treats: Array<{ id: PetTreat; emoji: string; label: string }> = [
+    { id: "apple", emoji: "🍎", label: "Apple" },
+    { id: "berries", emoji: "🫐", label: "Berries" },
+    { id: "cookie", emoji: "🍪", label: "Cookie" },
+  ];
+
+  return (
+    <div
+      data-pet-care-ui
+      role="dialog"
+      aria-label="Pet care"
+      className="not-prose fixed bottom-[108px] right-4 z-40 w-[min(284px,calc(100vw-2rem))] origin-bottom-right rounded-[22px] border border-border/75 bg-card/95 p-3 text-card-foreground shadow-[0_24px_70px_-28px_rgba(0,0,0,0.58)] backdrop-blur-xl motion-safe:animate-in motion-safe:zoom-in-95 motion-safe:slide-in-from-bottom-2 motion-safe:duration-200 sm:right-6"
+    >
+      <div className="mb-2.5 flex items-start justify-between gap-3 px-1">
+        <div>
+          <p className="text-sm font-semibold tracking-tight">A little care break</p>
+          <p className="text-[11px] leading-4 text-muted-foreground">
+            Pick something for your tiny companion.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close pet care"
+          className="grid size-7 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <XIcon className="size-3.5" />
+        </button>
+      </div>
+
+      <div
+        className={cn(
+          "rounded-2xl border p-2 transition-colors",
+          need === "food"
+            ? "border-amber-400/55 bg-amber-50/65 dark:bg-amber-950/20"
+            : "border-border/70 bg-muted/35"
+        )}
+      >
+        <div className="mb-1.5 flex items-center gap-1.5 px-1 text-[11px] font-medium text-muted-foreground">
+          <AppleIcon className="size-3" />
+          Choose a treat
+        </div>
+        <div className="grid grid-cols-3 gap-1.5">
+          {treats.map((treat) => (
+            <button
+              key={treat.id}
+              type="button"
+              disabled={busy}
+              onClick={() => onFeed(treat.id)}
+              className="group flex min-h-14 flex-col items-center justify-center rounded-xl border border-border/70 bg-background/80 text-[10px] font-medium transition-all hover:-translate-y-0.5 hover:border-foreground/20 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+            >
+              <span
+                aria-hidden="true"
+                className="text-xl leading-none transition-transform group-hover:scale-110"
+              >
+                {treat.emoji}
+              </span>
+              <span className="mt-1">{treat.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-2 grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          disabled={busy}
+          onClick={onWater}
+          className={cn(
+            "flex h-10 items-center justify-center gap-2 rounded-xl border text-xs font-medium transition-all hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
+            need === "water"
+              ? "border-sky-400/60 bg-sky-50 text-sky-800 dark:bg-sky-950/25 dark:text-sky-200"
+              : "border-border/70 bg-background/80"
+          )}
+        >
+          <DropletsIcon className="size-3.5 text-sky-500" />
+          Water
+        </button>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={onPlay}
+          className="flex h-10 items-center justify-center gap-2 rounded-xl border border-border/70 bg-background/80 text-xs font-medium transition-all hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+        >
+          <SparklesIcon className="size-3.5 text-amber-500" />
+          Play
+        </button>
+      </div>
+
+      <button
+        type="button"
+        onClick={onChat}
+        className="mt-2 flex h-9 w-full items-center justify-center gap-2 rounded-xl text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <MessageCircleIcon className="size-3.5" />
+        Ask {FIRST_NAME}&rsquo;s assistant
+      </button>
+    </div>
+  );
+}
+
+function PetCareReactionItem({
+  reaction,
+  treat,
+}: {
+  reaction: "eat" | "drink" | "play";
+  treat: PetTreat | null;
+}) {
+  const treatEmoji: Record<PetTreat, string> = {
+    apple: "🍎",
+    berries: "🫐",
+    cookie: "🍪",
+  };
+
+  if (reaction === "play") {
+    return (
+      <span aria-hidden="true" data-pet-play-sparkles className="absolute inset-0">
+        <span>✦</span>
+        <span>♥</span>
+        <span>✦</span>
+      </span>
+    );
+  }
+
+  return (
+    <span
+      aria-hidden="true"
+      data-pet-care-item={reaction}
+      className="absolute z-10 select-none"
+    >
+      {reaction === "eat" && treat ? treatEmoji[treat] : "💧"}
+    </span>
   );
 }
 

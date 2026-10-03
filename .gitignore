@@ -38,3 +38,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .content-collections
+
+# brag video working directories (plans, briefs, compositions, draft renders)
+/brag-output

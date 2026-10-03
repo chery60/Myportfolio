@@ -5,15 +5,20 @@ updatedAt: "2026-08-11"
 author: "Sai Charan Kalla"
 summary: "Toddle case study on unit template customization, unified planner fields, dataset mapping, and early AI-assisted unit creation workflows for curriculum planning."
 image: "/project-ai-unit-planning.png"
+video: "/case-studies/ai-unit-planning/00-explainer.mp4"
+videoPoster: "/case-studies/ai-unit-planning/00-explainer.jpg"
+walkthroughId: "VflbuL_Q9oE"
+walkthroughPoster: "/case-studies/ai-unit-planning/00-walkthrough-poster.jpg"
+walkthroughDuration: "3:36"
 ---
 
 export const withBasePath = (path) => ((process.env.GITHUB_PAGES === "true" ? "/" + (process.env.GITHUB_PAGES_REPOSITORY || "Myportfolio") : process.env.NEXT_PUBLIC_BASE_PATH) || "") + path;
 
-> Building a more flexible unit planning system for curriculum templates, custom datasets, and AI-assisted planner creation.
-
 <div className="not-prose my-6 overflow-hidden rounded-xl bg-card">
   <img src={withBasePath("/project-ai-unit-planning.png")} alt="AI Unit Planning project visual" className="h-auto w-full" />
 </div>
+
+> Building a more flexible unit planning system for curriculum templates, custom datasets, and AI-assisted planner creation.
 
 ---
 
@@ -24,6 +29,8 @@ At Toddle, unit planning sits at the center of how schools plan curriculum acros
 The dataset-driven fields had three important dataset types: card datasets, checklist datasets, and nested checklist datasets. Whenever an admin created a card, checklist, or nested checklist field, it needed to be tagged to a dataset of the same type. That dataset then powered the options teachers used inside the unit planner.
 
 My work on this project was split into three phases: unifying the existing planner fields, redesigning the unit template customization experience, and exploring how AI could help teachers generate meaningful customized unit planners.
+
+<ProjectVideo />
 
 ## How I Framed The Work
 
