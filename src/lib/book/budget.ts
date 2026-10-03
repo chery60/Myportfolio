@@ -1,19 +1,21 @@
 /**
- * How much a single page may hold. A page is a fixed-size piece of paper, not
- * a scrolling column, so its copy has to fit at the smallest phone width.
+ * How much a single page may hold. A page is a fixed-size, landscape piece of
+ * paper (about 1.13 : 1, the proportions of the reference sketchbook), not a
+ * scrolling column, so its copy has to fit at the smallest phone width: a
+ * heading, one picture and a handwritten line or two.
  * The data tests run every book through `pageBudgetViolations`.
  */
 import type { Block, BookPage } from "./types";
 
 export const PAGE_BUDGET = {
-  proseWordsWithMedia: 50,
-  proseWordsTextOnly: 100,
-  headingChars: 48,
-  noteChars: 110,
-  listItems: 5,
-  listItemWords: 14,
-  mediaBlocks: 2,
-  blocks: 6,
+  proseWordsWithMedia: 24,
+  proseWordsTextOnly: 48,
+  headingChars: 34,
+  noteChars: 80,
+  listItems: 4,
+  listItemWords: 9,
+  mediaBlocks: 1,
+  blocks: 5,
 } as const;
 
 function wordCount(text: string): number {

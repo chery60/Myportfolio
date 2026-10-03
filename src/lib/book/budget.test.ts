@@ -25,13 +25,30 @@ describe("proseWordCount", () => {
   });
 });
 
+describe("PAGE_BUDGET", () => {
+  // Pages are landscape (about 1.13 : 1, like the reference sketchbook), so
+  // each holds a short note: a heading, one picture and a line or two.
+  test("fits a landscape sketchbook page", () => {
+    expect(PAGE_BUDGET).toEqual({
+      proseWordsWithMedia: 24,
+      proseWordsTextOnly: 48,
+      headingChars: 34,
+      noteChars: 80,
+      listItems: 4,
+      listItemWords: 9,
+      mediaBlocks: 1,
+      blocks: 5,
+    });
+  });
+});
+
 describe("pageBudgetViolations", () => {
   test("accepts a page within budget", () => {
     const page: BookPage = {
       id: "ok",
       blocks: [
         { kind: "heading", text: "Short heading" },
-        { kind: "body", paragraphs: [words(40)] },
+        { kind: "body", paragraphs: [words(20)] },
         { kind: "image", image: fixtureImage("ok") },
       ],
     };
@@ -40,7 +57,7 @@ describe("pageBudgetViolations", () => {
   });
 
   test("allows more prose on a page without media", () => {
-    const page: BookPage = { id: "text", blocks: [{ kind: "body", paragraphs: [words(90)] }] };
+    const page: BookPage = { id: "text", blocks: [{ kind: "body", paragraphs: [words(45)] }] };
 
     expect(pageBudgetViolations(page)).toEqual([]);
   });
@@ -54,7 +71,7 @@ describe("pageBudgetViolations", () => {
       ],
     };
 
-    expect(pageBudgetViolations(page)).toEqual([`wordy: 51 prose words (max ${PAGE_BUDGET.proseWordsWithMedia})`]);
+    expect(pageBudgetViolations(page)).toEqual(["wordy: 25 prose words (max 24)"]);
   });
 
   test("flags long headings, long notes, long lists and crowded pages", () => {
@@ -63,21 +80,20 @@ describe("pageBudgetViolations", () => {
       blocks: [
         { kind: "heading", text: "x".repeat(PAGE_BUDGET.headingChars + 1) },
         { kind: "note", text: "y".repeat(PAGE_BUDGET.noteChars + 1) },
-        { kind: "list", items: ["a", "b", "c", "d", "e", "f"] },
+        { kind: "list", items: ["a", "b", "c", "d", "e"] },
         { kind: "list", items: [words(PAGE_BUDGET.listItemWords + 1)] },
         { kind: "image", image: fixtureImage("a") },
-        { kind: "image", image: fixtureImage("b") },
         { kind: "screens", images: [fixtureImage("c")] },
       ],
     };
 
     expect(pageBudgetViolations(page)).toEqual([
-      "busy: 7 blocks (max 6)",
-      "busy: 3 media blocks (max 2)",
-      "busy: heading longer than 48 characters",
-      "busy: note longer than 110 characters",
-      "busy: list with 6 items (max 5)",
-      "busy: list item longer than 14 words",
+      "busy: 6 blocks (max 5)",
+      "busy: 2 media blocks (max 1)",
+      "busy: heading longer than 34 characters",
+      "busy: note longer than 80 characters",
+      "busy: list with 5 items (max 4)",
+      "busy: list item longer than 9 words",
     ]);
   });
 });

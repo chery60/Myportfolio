@@ -10,6 +10,10 @@ function image(file: string, size: { width: number; height: number }, alt: strin
 
 const WALKTHROUGH_URL = "https://www.youtube.com/watch?v=uKQQbFIGt-c";
 
+/**
+ * Pages are landscape sketchbook pages: a heading, one picture and a short
+ * handwritten line. The full story stays in the case study below the book.
+ */
 export const symphonyKiosk: ProjectBook = {
   slug: "symphony-kiosk",
   title: "Symphony Kiosk",
@@ -25,14 +29,12 @@ export const symphonyKiosk: ProjectBook = {
           { kind: "heading", text: "Too many orders, too few hands" },
           {
             kind: "body",
-            paragraphs: [
-              "Oracle's Food & Beverage unit runs ordering for quick-service restaurants and stadium food courts. On busy days, the counter became the bottleneck.",
-            ],
+            paragraphs: ["Stadium food courts and quick-service counters jammed up on every busy day."],
           },
           {
             kind: "image",
             image: image("book/kiosk-hero.png", { width: 1000, height: 985 }, "The Symphony Kiosk: a free-standing touch screen showing a café welcome screen"),
-            caption: "Where this ends up — a guest self-ordering kiosk",
+            caption: "Where it ends up: a self-ordering kiosk",
             tape: "corners",
             tilt: -2,
           },
@@ -45,18 +47,13 @@ export const symphonyKiosk: ProjectBook = {
           {
             kind: "list",
             items: [
-              "Too few staff to take every order",
-              "Orders keyed in wrong at the counter",
-              "Slow to order, slow to pay, slow to collect",
-              "Hard for guests with disabilities or a language barrier",
+              "Too few staff for every order",
+              "Orders keyed in wrong",
+              "Slow to order, pay and collect",
+              "Hard with a disability or language barrier",
             ],
           },
-          { kind: "note", text: "And the shy guest at the back of the line often didn't order at all." },
-          {
-            kind: "callout",
-            label: "The brief",
-            text: "A self-ordering kiosk, hardware included, wired into the restaurant's existing system.",
-          },
+          { kind: "note", text: "And shy guests often didn't order at all." },
         ],
       },
     },
@@ -72,12 +69,8 @@ export const symphonyKiosk: ProjectBook = {
           {
             kind: "image",
             image: image("02-currently.png", { width: 2843, height: 1490 }, "Diagram: Enterprise Management Console, Point of Sale and Kitchen Display System connected to each other"),
-            caption: "Console, point of sale and kitchen display",
+            caption: "Console, point of sale, kitchen display",
             tape: "corners",
-          },
-          {
-            kind: "body",
-            paragraphs: ["A cashier keyed each order into the point of sale before the kitchen ever saw it."],
           },
         ],
       },
@@ -92,15 +85,7 @@ export const symphonyKiosk: ProjectBook = {
             caption: "The kiosk talks to all three",
             tape: "top",
           },
-          {
-            kind: "list",
-            items: [
-              "Staff freed up to prepare and hand out food",
-              "Guests enter their own order, so fewer errors",
-              "Faster ordering, even for shy guests",
-              "Ready alerts and easy payment",
-            ],
-          },
+          { kind: "note", text: "Fewer errors, shorter lines, staff back on the food.", align: "end" },
         ],
       },
     },
@@ -112,28 +97,28 @@ export const symphonyKiosk: ProjectBook = {
         id: "goals-speed",
         blocks: [
           { kind: "kicker", text: "User goal 01" },
-          { kind: "heading", text: "Get my food served quickly" },
+          { kind: "heading", text: "Get my food, quickly" },
           {
             kind: "image",
             image: image("04-usergoal1.png", SLIDE, "User goal slide: as a restaurant guest, Megan needs to order on a kiosk so her food is served quickly"),
             caption: "Megan, restaurant guest",
             tape: "corners",
           },
-          { kind: "note", text: "She already knows what she wants. Every extra tap is a delay." },
+          { kind: "note", text: "She knows what she wants. Every tap is a delay." },
         ],
       },
       right: {
         id: "goals-quiet",
         blocks: [
           { kind: "kicker", text: "User goal 02" },
-          { kind: "heading", text: "Order without talking to anyone" },
+          { kind: "heading", text: "Order without small talk" },
           {
             kind: "image",
             image: image("05-usergoal2.png", SLIDE, "User goal slide: Luffy wants food served without human interaction because of introversion, distancing, language or anxiety"),
             caption: "Luffy, restaurant guest",
             tape: "corners",
           },
-          { kind: "note", text: "Introversion, social distancing, a language barrier, social anxiety. All real reasons.", align: "end" },
+          { kind: "note", text: "Introversion, distancing, language, anxiety.", align: "end" },
         ],
       },
     },
@@ -146,17 +131,9 @@ export const symphonyKiosk: ProjectBook = {
         blocks: [
           { kind: "kicker", text: "Persona" },
           { kind: "heading", text: "Express or browsing?" },
-          {
-            kind: "body",
-            paragraphs: [
-              "Watching guests order, two mental models kept showing up. Each needs a different path through the same menu.",
-            ],
-          },
-          {
-            kind: "list",
-            items: ["Express mode: knows exactly what to order", "Browsing mode: wants to explore the options"],
-          },
-          { kind: "note", text: "Serve both without slowing either one down." },
+          { kind: "body", paragraphs: ["Watching guests order, two mental models kept showing up."] },
+          { kind: "list", items: ["Express: already knows the order", "Browsing: wants to explore first"] },
+          { kind: "note", text: "Serve both without slowing either." },
         ],
       },
       right: {
@@ -165,7 +142,7 @@ export const symphonyKiosk: ProjectBook = {
           {
             kind: "image",
             image: image("06-persona.png", SLIDE, "Persona slide: express mode guests know what they want; browsing mode guests want to explore their options"),
-            caption: "Two personas, based on mental model",
+            caption: "Two personas, by mental model",
             tape: "top",
             tilt: 1.5,
           },
@@ -183,18 +160,15 @@ export const symphonyKiosk: ProjectBook = {
           { kind: "kicker", text: "Success metrics" },
           { kind: "heading", text: "Measure the whole visit" },
           {
-            kind: "body",
-            paragraphs: ["We split a visit into three phases and picked metrics for each, starting with express guests."],
-          },
-          {
             kind: "list",
             ordered: true,
             items: [
-              "Pre-order: time to find a stand, wait to order",
-              "Order and pay: taps, completion, accuracy, payment success",
-              "Post-order: pickup wait, clear pickup info, time away",
+              "Pre-order: find a stand, wait to order",
+              "Order and pay: taps, accuracy, payment",
+              "Post-order: pickup wait and clarity",
             ],
           },
+          { kind: "note", text: "Starting with express guests." },
         ],
       },
       right: {
@@ -203,10 +177,10 @@ export const symphonyKiosk: ProjectBook = {
           {
             kind: "image",
             image: image("07-success-matrix.png", SLIDE, "Success metrics slide listing pre-order, order and pay, and post-order measures"),
-            caption: "Success matrix. Use the loupe for the small print",
+            caption: "Use the magnifier for the small print",
             tape: "corners",
           },
-          { kind: "note", text: "Order accuracy is where a kiosk should beat a busy cashier." },
+          { kind: "note", text: "Accuracy is where a kiosk beats a busy cashier." },
         ],
       },
     },
@@ -222,7 +196,7 @@ export const symphonyKiosk: ProjectBook = {
           {
             kind: "image",
             image: image("08-user-journey.png", SLIDE, "Journey map: browse, locate, decide, queue, order, pay, collect, return, with pain points marked for in-person and kiosk ordering"),
-            caption: "Browse → decide → queue → order → pay → collect → return",
+            caption: "Browse → decide → queue → order → pay → collect",
             tape: "top",
           },
         ],
@@ -232,18 +206,12 @@ export const symphonyKiosk: ProjectBook = {
         blocks: [
           { kind: "heading", text: "Where it hurts" },
           {
-            kind: "body",
-            paragraphs: [
-              "Browsing guests wander before they queue. Express guests decide first, then hunt for the stand. Both paths meet at the queue.",
-            ],
-          },
-          {
             kind: "list",
             items: [
-              "Deciding and queueing hurt, in person and on a kiosk",
-              "Ordering adds friction only on the kiosk",
-              "Collecting food is a kiosk-only pain point",
-              "Getting back to the event hurts everyone",
+              "Deciding and queueing: everywhere",
+              "Ordering: only on the kiosk",
+              "Collecting food: only on the kiosk",
+              "Getting back to the event: everyone",
             ],
           },
           { kind: "note", text: "The kiosk had to fix more than it broke.", align: "end" },
@@ -265,7 +233,7 @@ export const symphonyKiosk: ProjectBook = {
             caption: "Minimum, maximum and typical for each",
             tape: "corners",
           },
-          { kind: "note", text: "Up to 10 condiment groups on one item. The item screen had to cope." },
+          { kind: "note", text: "Up to 10 condiment groups on one item." },
         ],
       },
       right: {
@@ -275,13 +243,10 @@ export const symphonyKiosk: ProjectBook = {
           {
             kind: "image",
             image: image("10-shape-of-data2.png", SLIDE, "More menu data: items per category, advisory length, images per item, available discounts and items per order"),
-            caption: "Discounts, advisories, images, basket size",
+            caption: "Discounts, advisories, basket size",
             tape: "top",
           },
-          {
-            kind: "body",
-            paragraphs: ["A typical order holds three or four items, but ten discounts can apply, so the cart had to stay readable at the extremes."],
-          },
+          { kind: "note", text: "Three or four items is typical; ten discounts can apply.", align: "end" },
         ],
       },
     },
@@ -297,13 +262,10 @@ export const symphonyKiosk: ProjectBook = {
           {
             kind: "image",
             image: image("book/sitemap.png", { width: 2400, height: 939 }, "Kiosk sitemap in four zones: general, build and modify order, checkout and payment, post payment"),
-            caption: "General · Build order · Checkout · Post payment",
+            caption: "General · Build · Checkout · Post payment",
             tape: "corners",
           },
-          {
-            kind: "body",
-            paragraphs: ["Built after talking to guests and staff about everything from walking in to getting the food."],
-          },
+          { kind: "note", text: "Built after talking to guests and staff." },
         ],
       },
       right: {
@@ -316,10 +278,7 @@ export const symphonyKiosk: ProjectBook = {
             caption: "Menu, upsell, cart, item, combo",
             tape: "top",
           },
-          {
-            kind: "body",
-            paragraphs: ["Then the map was split into smaller task flows that developers could build and test in phases."],
-          },
+          { kind: "note", text: "Split into flows developers could ship in phases.", align: "end" },
         ],
       },
     },
@@ -340,9 +299,9 @@ export const symphonyKiosk: ProjectBook = {
               image("book/lofi-upsell.png", SCREEN, "Wireframe: you might also like upsell screen"),
               image("book/lofi-tip.png", SCREEN, "Wireframe: add a tip with preset percentages"),
             ],
-            caption: "Welcome, item, upsell and tip, tested with users",
+            caption: "Welcome, item, upsell, tip",
           },
-          { kind: "note", text: "Every unique screen drawn in portrait and landscape." },
+          { kind: "note", text: "Portrait and landscape, tested with users." },
         ],
       },
       right: {
@@ -363,7 +322,7 @@ export const symphonyKiosk: ProjectBook = {
           {
             kind: "callout",
             label: "Handoff",
-            text: "Flows went to developers to build and test in phases.",
+            text: "Shipped to developers in phases.",
             links: [
               { label: "Watch the walkthrough", href: WALKTHROUGH_URL },
               { label: "Read the full case study", href: "#case-study" },

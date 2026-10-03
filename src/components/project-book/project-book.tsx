@@ -16,7 +16,7 @@ import {
 import { bookReducer, canStep, createBookState, sceneFor } from "@/lib/book/turn-machine";
 import type { BookLayout, ProjectBook as ProjectBookData } from "@/lib/book/types";
 import { cn } from "@/lib/utils";
-import { BookControls, CONTROL_BUTTON } from "./book-controls";
+import { BookControls } from "./book-controls";
 import { BookStage } from "./book-stage";
 import { LoupeOverlay } from "./loupe-overlay";
 import styles from "./project-book.module.css";
@@ -29,6 +29,16 @@ import { type TapPoint, useTurnGesture } from "./use-turn-gesture";
 
 interface ProjectBookProps {
   book: ProjectBookData;
+}
+
+/** The open spread's name in spaced capitals, with its one-line caption. */
+function SpreadCaption({ title, caption }: { title: string; caption: string }) {
+  return (
+    <>
+      <p className={styles.spreadTitle}>{title}</p>
+      <p className={styles.caption}>{caption}</p>
+    </>
+  );
 }
 
 /**
@@ -95,6 +105,7 @@ export function ProjectBook({ book }: ProjectBookProps) {
   };
 
   const spreadIndex = spreadIndexOf(state.page);
+  const spreadTitle = book.spreads[spreadIndex]?.title ?? "";
   const caption = book.spreads[spreadIndex]?.caption ?? "";
   const counter =
     state.layout === "spread"
@@ -134,38 +145,41 @@ export function ProjectBook({ book }: ProjectBookProps) {
           <p id={glassHintId} className="sr-only">
             Drag the magnifier or move it with the arrow keys; hold Shift to move faster. Escape puts it away.
           </p>
-          <div className={styles.toolbar}>
-            <BookControls
-              counter={counter}
-              canPrev={canStep(state, "prev")}
-              canNext={canStep(state, "next")}
-              onPrev={() => step("prev")}
-              onNext={() => step("next")}
+          {state.navCount === 0 ? (
+            <div className={styles.captions}>
+              <SpreadCaption title={spreadTitle} caption={caption} />
+            </div>
+          ) : (
+            <Rise key={spreadIndex} className={styles.captions}>
+              <SpreadCaption title={spreadTitle} caption={caption} />
+            </Rise>
+          )}
+          <BookControls
+            counter={counter}
+            canPrev={canStep(state, "prev")}
+            canNext={canStep(state, "next")}
+            onPrev={() => step("prev")}
+            onNext={() => step("next")}
+          >
+            <button
+              ref={toggleRef}
+              type="button"
+              className={cn(styles.tool, styles.toolWide)}
+              aria-pressed={loupe.open}
+              onClick={(event: MouseEvent<HTMLButtonElement>) => loupe.toggle(event.detail === 0)}
             >
-              <button
-                ref={toggleRef}
-                type="button"
-                className={cn(CONTROL_BUTTON, "gap-2 text-sm min-[400px]:w-auto min-[400px]:px-4")}
-                aria-pressed={loupe.open}
-                onClick={(event: MouseEvent<HTMLButtonElement>) => loupe.toggle(event.detail === 0)}
-              >
-                <Morph
-                  active={loupe.open}
-                  off={<Search className="size-4" aria-hidden="true" />}
-                  on={<X className="size-4" aria-hidden="true" />}
-                />
-                {/* Icon-only on very narrow screens; the name stays for screen readers. */}
-                <span className="max-[399px]:sr-only">Magnifier</span>
-              </button>
-            </BookControls>
-            {state.navCount === 0 ? (
-              <p className={styles.caption}>{caption}</p>
-            ) : (
-              <Rise key={spreadIndex} as="p" className={styles.caption}>
-                {caption}
-              </Rise>
-            )}
-          </div>
+              <Morph
+                active={loupe.open}
+                off={<Search className="size-4" aria-hidden="true" />}
+                on={<X className="size-4" aria-hidden="true" />}
+              />
+              {/* Icon-only on very narrow frames; the name stays for screen readers. */}
+              <span className={styles.toolLabel}>Magnifier</span>
+            </button>
+          </BookControls>
+          <p className={styles.hint} aria-hidden="true">
+            Drag the page to turn · Magnify the small print
+          </p>
           <p className="sr-only" aria-live="polite" aria-atomic="true">
             {state.navCount > 0 ? positionLabel(book, state.page, state.layout) : ""}
           </p>

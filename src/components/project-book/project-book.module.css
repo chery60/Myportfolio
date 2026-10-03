@@ -1,63 +1,100 @@
 /*
- * The book on its desk. Layout switches on the frame's own width (container
- * query), not the viewport, using the same threshold as the JS layout
- * (SPREAD_MIN_FRAME_WIDTH = 720px in src/lib/book/pages.ts). Server HTML always
- * renders spread 1; on a narrow frame the container query hides its right page,
- * which is exactly what the single-page layout shows after hydration.
+ * The book resting on its own surface. A warm wash (the "desk") sits behind
+ * the book and fades softly into the site background; the paper is a lighter
+ * cream with rounded outer corners and pooled shadows, so the book reads as
+ * an object lying on the page rather than a panel printed on it.
+ *
+ * Proportions follow the reference sketchbook: an open spread is 2.26 : 1
+ * (808 × 358 px at most), so each page is a slightly landscape 1.13 : 1.
+ * Narrow frames show one page of the same shape.
+ *
+ * Layout switches on the frame's own width (container query), using the same
+ * threshold as the JS layout (SPREAD_MIN_FRAME_WIDTH = 720px in
+ * src/lib/book/pages.ts). Server HTML always renders spread 1; on a narrow
+ * frame the container query hides its right page, which is exactly what the
+ * single-page layout shows after hydration.
  */
 
 /* Wider than the 672px text column: centred on it, never wider than the viewport. */
 .breakout {
-  --book-width: min(960px, calc(100vw - 2rem));
-  width: var(--book-width);
-  margin-left: calc((100% - var(--book-width)) / 2);
+  --band-width: min(1200px, calc(100vw - 2rem));
+  width: var(--band-width);
+  margin-left: calc((100% - var(--band-width)) / 2);
   margin-bottom: 2.5rem;
 }
 
 .book {
-  --book-paper: #ece7dc;
+  --book-paper: #f8f4ec;
   --book-ink: #2b2620;
   --book-ink-soft: #5f584d;
+  --book-ink-faint: #8c8475;
   --book-pencil: #2f4a8a;
   --book-marker: #a4442a;
+  --book-hairline: rgb(90 70 40 / 0.16);
+  --book-ease: cubic-bezier(0.2, 0, 0, 1);
   --book-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.36 0 0 0 0 0.28 0 0 0 0 0.17 0 0 0 0.07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+
+:global(.dark) .book {
+  --book-ink-faint: #a49b8b;
+  --book-hairline: rgb(255 240 220 / 0.14);
 }
 
 .frame {
   container: book-frame / inline-size;
 }
 
+/* The surface the book rests on. */
 .desk {
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
-  gap: clamp(14px, 2.4cqi, 22px);
-  padding: clamp(16px, 4cqi, 40px) clamp(10px, 3.6cqi, 36px) clamp(14px, 2.6cqi, 26px);
-  border-radius: 20px;
-  background:
-    radial-gradient(120% 90% at 50% 0%, oklch(0.985 0.008 85), transparent 70%),
-    oklch(0.95 0.012 82);
+  align-items: center;
+  padding: clamp(40px, 9cqi, 96px) clamp(12px, 4.5cqi, 64px) clamp(32px, 6cqi, 72px);
 }
 
-:global(.dark) .desk {
+.desk::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  /* An even warm surface (like the reference's paper-coloured page) with only
+     faint watercolour variation, so the lighter book contrasts everywhere. */
   background:
-    radial-gradient(120% 90% at 50% 0%, oklch(0.27 0.01 70), transparent 70%),
-    oklch(0.2 0.008 70);
+    radial-gradient(34% 40% at 18% 72%, rgb(206 190 158 / 0.22), transparent 70%),
+    radial-gradient(30% 36% at 84% 24%, rgb(198 190 166 / 0.2), transparent 70%),
+    var(--book-grain),
+    #e9e2d3;
+  /* A wash, not a box: the surface dissolves into the page at its edges. */
+  -webkit-mask-image: radial-gradient(closest-side, #000 74%, transparent);
+  mask-image: radial-gradient(closest-side, #000 74%, transparent);
+}
+
+:global(.dark) .desk::before {
+  background:
+    radial-gradient(34% 40% at 18% 72%, rgb(160 130 90 / 0.1), transparent 70%),
+    radial-gradient(30% 36% at 84% 24%, rgb(140 130 110 / 0.08), transparent 70%),
+    #1f1b17;
 }
 
 .stage {
-  --page-w: calc(var(--stage-w, 888px) / 2);
-  --page-h: calc(var(--page-w) * 4 / 3);
+  --page-w: calc(var(--stage-w, 808px) / 2);
+  /* Rounded outer corners of the paper, shared by pages, leaf and lens. */
+  --page-radius: clamp(6px, calc(var(--page-w) * 0.03), 13px);
   position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 100%;
-  width: min(100%, clamp(600px, (100svh - 11rem) * 1.5, 888px));
-  aspect-ratio: 3 / 2;
-  margin-inline: auto;
-  border-radius: 3px;
+  width: min(100%, 808px);
+  aspect-ratio: 808 / 358;
+  border-radius: var(--page-radius);
   box-shadow:
-    0 34px 48px -30px rgb(30 20 10 / 0.6),
-    0 14px 22px -16px rgb(30 20 10 / 0.45);
+    0 1px 1px rgb(60 44 24 / 0.12),
+    0 3px 6px -2px rgb(60 44 24 / 0.14),
+    0 16px 26px -12px rgb(60 44 24 / 0.32),
+    0 42px 64px -30px rgb(60 44 24 / 0.42);
   perspective: calc(var(--page-w) * 5.5);
   perspective-origin: 50% 45%;
   touch-action: pan-y pinch-zoom;
@@ -67,9 +104,35 @@
   cursor: grab;
 }
 
+/* Shadow pooled on the surface just under the book. */
+.stage::before {
+  content: "";
+  position: absolute;
+  left: 7%;
+  right: 7%;
+  bottom: -9%;
+  height: 26%;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(50% 50% at 50% 38%, rgb(50 36 18 / 0.28), transparent 75%);
+  filter: blur(14px);
+}
+
+:global(.dark) .stage {
+  box-shadow:
+    0 1px 1px rgb(0 0 0 / 0.4),
+    0 4px 8px -2px rgb(0 0 0 / 0.4),
+    0 18px 30px -12px rgb(0 0 0 / 0.6),
+    0 46px 70px -30px rgb(0 0 0 / 0.75);
+}
+
 .stage:focus-visible {
-  outline: 2px solid var(--foreground);
+  outline: 2px solid var(--book-pencil);
   outline-offset: 6px;
+}
+
+:global(.dark) .stage:focus-visible {
+  outline-color: #e9e2d4;
 }
 
 .stage[data-turning] {
@@ -95,32 +158,162 @@
   grid-column: 1 / -1;
 }
 
-.toolbar {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
+/* --- Under the book: title, caption, tools, hint ----------------------- */
+
+.captions {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  margin-top: clamp(28px, 4cqi, 40px);
+  padding-inline: 8px;
+  text-align: center;
+}
+
+.spreadTitle {
+  margin: 0;
+  font-family: var(--font-book-body), Georgia, serif;
+  font-size: 13px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--book-ink-soft);
 }
 
 .caption {
   min-height: 1.4em;
   margin: 0;
-  padding-inline: 8px;
   font-family: var(--font-book-display), Georgia, serif;
   font-size: 16px;
   font-style: italic;
   line-height: 1.35;
-  text-align: center;
   text-wrap: balance;
-  color: var(--muted-foreground);
+  color: var(--book-ink-faint);
+}
+
+:global(.dark) .spreadTitle {
+  color: #d9d0c0;
+}
+
+.tools {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 18px;
+  padding: 4px 6px;
+  border: 1px solid var(--book-hairline);
+  border-radius: 999px;
+  background: rgb(250 246 238 / 0.62);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: var(--book-ink-soft);
+}
+
+:global(.dark) .tools {
+  background: rgb(36 32 27 / 0.62);
+  color: #d9d0c0;
+}
+
+.tool {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  color: inherit;
+  transition:
+    background-color 200ms var(--book-ease),
+    color 200ms var(--book-ease),
+    scale 320ms var(--book-ease);
+}
+
+.tool:hover {
+  background: rgb(90 70 40 / 0.08);
+}
+
+:global(.dark) .tool:hover {
+  background: rgb(255 240 220 / 0.08);
+}
+
+.tool:active {
+  scale: 0.97;
+  transition-duration: 120ms;
+}
+
+.tool:focus-visible {
+  outline: 2px solid var(--book-pencil);
+  outline-offset: 2px;
+}
+
+:global(.dark) .tool:focus-visible {
+  outline-color: #e9e2d4;
+}
+
+.tool[aria-disabled="true"] {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.tool[aria-disabled="true"]:hover {
+  background: transparent;
+}
+
+.tool[aria-disabled="true"]:active {
+  scale: 1;
+}
+
+.tool[aria-pressed="true"] {
+  background: rgb(164 68 42 / 0.12);
+  color: var(--book-marker);
+}
+
+:global(.dark) .tool[aria-pressed="true"] {
+  background: rgb(233 168 140 / 0.16);
+  color: #f0b9a2;
+}
+
+.toolWide {
+  width: auto;
+  padding-inline: 12px 14px;
+  font-family: var(--font-book-body), Georgia, serif;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.counter {
+  min-width: 6.5rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+.divider {
+  flex: none;
+  width: 1px;
+  height: 20px;
+  margin-inline: 4px;
+  background: var(--book-hairline);
+}
+
+.hint {
+  margin: 14px 0 0;
+  font-family: var(--font-book-body), Georgia, serif;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--book-ink-faint);
 }
 
 @container book-frame (width < 720px) {
   .stage {
-    --page-w: var(--stage-w, 358px);
+    --page-w: var(--stage-w, 334px);
     grid-template-columns: 1fr;
     width: min(100%, 480px);
-    aspect-ratio: 3 / 4;
+    aspect-ratio: 404 / 358;
   }
 
   .slot[data-side="right"] {
@@ -129,5 +322,22 @@
 
   .slot[data-side="left"] {
     grid-column: 1 / -1;
+  }
+}
+
+/* Very narrow phones: the magnifier button keeps its icon only. */
+@container book-frame (width < 400px) {
+  .toolWide {
+    width: 40px;
+    padding-inline: 0;
+  }
+
+  .toolLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }
