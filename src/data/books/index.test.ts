@@ -9,7 +9,7 @@ describe("getProjectBook", () => {
   });
 
   test("returns undefined for case studies without a book", () => {
-    expect(getProjectBook("companies-platform")).toBeUndefined();
+    expect(getProjectBook("not-a-case-study")).toBeUndefined();
     expect(getProjectBook("")).toBeUndefined();
   });
 

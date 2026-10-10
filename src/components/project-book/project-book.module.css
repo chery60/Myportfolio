@@ -1,12 +1,13 @@
 /*
- * The book resting on its own surface. A warm wash (the "desk") sits behind
- * the book and fades softly into the site background; the paper is a lighter
- * cream with rounded outer corners and pooled shadows, so the book reads as
- * an object lying on the page rather than a panel printed on it.
+ * The book lying open in its dialog (project-book-dialog.tsx), on the page
+ * colour: no surface of its own. The paper is cream with rounded outer corners
+ * and pooled shadows, so the book reads as an object resting there rather than
+ * a panel printed on it. A magnifying glass rests off its bottom-right corner.
  *
  * Proportions follow the reference sketchbook: an open spread is 2.26 : 1
- * (808 × 358 px at most), so each page is a slightly landscape 1.13 : 1.
- * Narrow frames show one page of the same shape.
+ * (808 × 358), so each page is a slightly landscape 1.13 : 1. Narrow frames
+ * show one page of the same shape. The book is as large as the viewport lets
+ * it be, so its text reads comfortably; everything on a page scales with it.
  *
  * Layout switches on the frame's own width (container query), using the same
  * threshold as the JS layout (SPREAD_MIN_FRAME_WIDTH = 720px in
@@ -14,14 +15,6 @@
  * frame the container query hides its right page, which is exactly what the
  * single-page layout shows after hydration.
  */
-
-/* Wider than the 672px text column: centred on it, never wider than the viewport. */
-.breakout {
-  --band-width: min(1200px, calc(100vw - 2rem));
-  width: var(--band-width);
-  margin-left: calc((100% - var(--band-width)) / 2);
-  margin-bottom: 2.5rem;
-}
 
 .book {
   --book-paper: #f8f4ec;
@@ -44,39 +37,30 @@
   container: book-frame / inline-size;
 }
 
-/* The surface the book rests on. */
+/* Lays out the book and what sits under it. Transparent: the page shows through. */
 .desk {
+  --desk-pad-x: clamp(12px, 4.5cqi, 64px);
+  /* What the dialog needs besides the book: its header and margins, the
+     captions, the controls and the hint. The spread takes the rest of the
+     viewport's height, up to a sensible maximum. Its minimum keeps each page
+     as wide as a phone's (what the page budget is written for); on screens
+     too short for that, the dialog scrolls. */
+  --desk-chrome: 21.5rem;
+  --stage-max: clamp(640px, calc((100dvh - var(--desk-chrome)) * 808 / 358), 1280px);
+  /* The stage's width, as wide as the desk's content box allows. */
+  --stage-width: min(var(--stage-max), 100cqi - 2 * var(--desk-pad-x));
+  /* The glass diameter, mirroring glassDiameter() in src/lib/book/loupe-geometry.ts
+     (23.5% of the stage, 140–262px), so the space under the book is right before
+     any script runs. */
+  --glass-d: clamp(140px, calc(var(--stage-width) * 0.235), 262px);
   position: relative;
   isolation: isolate;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: clamp(40px, 9cqi, 96px) clamp(12px, 4.5cqi, 64px) clamp(32px, 6cqi, 72px);
-}
-
-.desk::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  /* An even warm surface (like the reference's paper-coloured page) with only
-     faint watercolour variation, so the lighter book contrasts everywhere. */
-  background:
-    radial-gradient(34% 40% at 18% 72%, rgb(206 190 158 / 0.22), transparent 70%),
-    radial-gradient(30% 36% at 84% 24%, rgb(198 190 166 / 0.2), transparent 70%),
-    var(--book-grain),
-    #e9e2d3;
-  /* A wash, not a box: the surface dissolves into the page at its edges. */
-  -webkit-mask-image: radial-gradient(closest-side, #000 74%, transparent);
-  mask-image: radial-gradient(closest-side, #000 74%, transparent);
-}
-
-:global(.dark) .desk::before {
-  background:
-    radial-gradient(34% 40% at 18% 72%, rgb(160 130 90 / 0.1), transparent 70%),
-    radial-gradient(30% 36% at 84% 24%, rgb(140 130 110 / 0.08), transparent 70%),
-    #1f1b17;
+  /* Room above for the stage's focus ring (offset 6px, 2px wide); below,
+     for the resting glass's handle, which reaches past the hint. */
+  padding: 12px var(--desk-pad-x) 48px;
 }
 
 .stage {
@@ -87,7 +71,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 100%;
-  width: min(100%, 808px);
+  width: min(100%, var(--stage-max));
   aspect-ratio: 808 / 358;
   border-radius: var(--page-radius);
   box-shadow:
@@ -160,20 +144,28 @@
 
 /* --- Under the book: title, caption, tools, hint ----------------------- */
 
+/* These use the site's own type (Geist, inherited from <body>) so they read as
+   part of the page; the sketchbook fonts belong to the paper only. The spaced
+   capitals match the video-embed label in youtube-embed.tsx. */
+
 .captions {
   display: grid;
   justify-items: center;
   gap: 6px;
-  margin-top: clamp(28px, 4cqi, 40px);
+  /* On a spread the resting glass hangs off to the right of the centred
+     captions, so they can sit close under the book. They stay narrower than
+     the gap it leaves, wrapping rather than running under it. */
+  max-width: calc(var(--stage-width) - 2.2 * var(--glass-d));
+  margin-top: 32px;
   padding-inline: 8px;
   text-align: center;
 }
 
 .spreadTitle {
   margin: 0;
-  font-family: var(--font-book-body), Georgia, serif;
-  font-size: 13px;
-  letter-spacing: 0.24em;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--book-ink-soft);
 }
@@ -181,10 +173,8 @@
 .caption {
   min-height: 1.4em;
   margin: 0;
-  font-family: var(--font-book-display), Georgia, serif;
-  font-size: 16px;
-  font-style: italic;
-  line-height: 1.35;
+  font-size: 14px;
+  line-height: 1.45;
   text-wrap: balance;
   color: var(--book-ink-faint);
 }
@@ -276,8 +266,8 @@
 .toolWide {
   width: auto;
   padding-inline: 12px 14px;
-  font-family: var(--font-book-body), Georgia, serif;
   font-size: 14px;
+  font-weight: 500;
   line-height: 1;
 }
 
@@ -300,19 +290,31 @@
 
 .hint {
   margin: 14px 0 0;
-  font-family: var(--font-book-body), Georgia, serif;
   font-size: 11px;
-  letter-spacing: 0.16em;
+  font-weight: 500;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   text-align: center;
   color: var(--book-ink-faint);
 }
 
 @container book-frame (width < 720px) {
+  .desk {
+    /* One page of 404 × 358, fitted to the height the same way. */
+    --stage-max: min(640px, max(280px, calc((100dvh - var(--desk-chrome)) * 404 / 358)));
+  }
+
+  /* On one page the glass rests over the captions' column: clear it. It hangs
+     0.58 of its diameter below the book (REST_DROP_RATIO + its radius in
+     loupe-geometry.ts). */
+  .captions {
+    max-width: none;
+    margin-top: calc(var(--glass-d) * 0.58 + 16px);
+  }
+
   .stage {
     --page-w: var(--stage-w, 334px);
     grid-template-columns: 1fr;
-    width: min(100%, 480px);
     aspect-ratio: 404 / 358;
   }
 

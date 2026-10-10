@@ -7,7 +7,7 @@ import { MDXContent } from "@content-collections/mdx/react";
 import { mdxComponents } from "@/mdx-components";
 import { ProjectBackLink, ProjectBackLinkFallback } from "@/components/project-back-link";
 import { CaseStudyVideo } from "@/components/case-study-video";
-import { ProjectBookSection } from "@/components/project-book/project-book-section";
+import { ProjectBookLauncher } from "@/components/project-book/project-book-launcher";
 import { getProjectBook } from "@/data/books";
 import { PetGreeting } from "@/components/pet-greeting";
 import Link from "next/link";
@@ -158,9 +158,12 @@ export default async function Blog({
         </Suspense>
       </div>
       <div className="flex flex-col gap-4">
-        <h1 className="title font-semibold text-3xl md:text-4xl tracking-tighter leading-tight">
-          {post.title}
-        </h1>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
+          <h1 className="title font-semibold text-3xl md:text-4xl tracking-tighter leading-tight">
+            {post.title}
+          </h1>
+          {book && <ProjectBookLauncher book={book} />}
+        </div>
         <p className="text-sm text-muted-foreground">
           {formatDate(post.publishedAt)}
         </p>
@@ -176,10 +179,9 @@ export default async function Blog({
           }}
         />
       </div>
-      {book && <ProjectBookSection book={book} />}
       <article
         id="case-study"
-        className="prose max-w-full scroll-mt-8 text-pretty font-sans leading-relaxed text-muted-foreground dark:prose-invert"
+        className="prose max-w-full scroll-mt-8 text-pretty font-sans leading-relaxed text-muted-foreground outline-none dark:prose-invert"
       >
         <MDXContent
           code={post.mdx}

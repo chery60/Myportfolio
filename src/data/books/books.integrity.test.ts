@@ -7,10 +7,11 @@ import path from "node:path";
 import { describe, expect, test } from "vitest";
 import { pageBudgetViolations } from "@/lib/book/budget";
 import { flattenPages } from "@/lib/book/pages";
-import type { Block, BookImage, ProjectBook } from "@/lib/book/types";
+import type { Block, BookImage, BookLink, BookPage, ProjectBook } from "@/lib/book/types";
 import { getProjectBook, projectBookSlugs } from "./index";
 
 const PUBLIC_DIR = path.join(process.cwd(), "public");
+const CONTENT_DIR = path.join(process.cwd(), "content");
 const MAX_ALT_LENGTH = 140;
 const PNG_SIGNATURE = "89504e470d0a1a0a";
 
@@ -33,6 +34,16 @@ function blockImages(block: Block): readonly BookImage[] {
 
 function imagesOf(book: ProjectBook): readonly BookImage[] {
   return flattenPages(book).flatMap(({ page }) => page.blocks.flatMap(blockImages));
+}
+
+function linksOn(page: BookPage): readonly BookLink[] {
+  return page.blocks.flatMap((block) => (block.kind === "callout" ? (block.links ?? []) : []));
+}
+
+/** The case study's walkthrough video id, from its MDX front matter. */
+function walkthroughIdOf(slug: string): string | undefined {
+  const source = readFileSync(path.join(CONTENT_DIR, `${slug}.mdx`), "utf8");
+  return /^walkthroughId:\s*"([^"]+)"/m.exec(source)?.[1];
 }
 
 /** Reads width and height from a PNG's IHDR chunk. */
@@ -93,20 +104,31 @@ describe.each(books().map((book) => [book.slug, book] as const))("book %s", (_sl
   });
 
   test("links only to site paths, anchors or https", () => {
-    const links = flattenPages(book).flatMap(({ page }) =>
-      page.blocks.flatMap((block) => (block.kind === "callout" ? (block.links ?? []) : [])),
-    );
+    const links = flattenPages(book).flatMap(({ page }) => linksOn(page));
     for (const link of links) {
       expect(link.href, link.label).toMatch(/^(\/|#|https:\/\/)/);
     }
   });
+
+  test("tells the project in six to ten spreads, opening on the problem", () => {
+    expect(book.spreads.length).toBeGreaterThanOrEqual(6);
+    expect(book.spreads.length).toBeLessThanOrEqual(10);
+    expect(book.spreads[0].title).toMatch(/problem/i);
+  });
+
+  test("ends on its own walkthrough and the full case study", () => {
+    const last = book.spreads[book.spreads.length - 1];
+    const hrefs = [...linksOn(last.left), ...linksOn(last.right)].map((link) => link.href);
+    const walkthroughId = walkthroughIdOf(book.slug);
+
+    expect(walkthroughId, "walkthroughId in the case study").toBeDefined();
+    expect(hrefs).toContain(`https://www.youtube.com/watch?v=${walkthroughId}`);
+    expect(hrefs).toContain("#case-study");
+  });
 });
 
-describe("symphony-kiosk", () => {
-  test("tells the project in nine spreads, opening on the problem", () => {
-    const book = getProjectBook("symphony-kiosk");
-
-    expect(book?.spreads).toHaveLength(9);
-    expect(book?.spreads[0].title).toMatch(/problem/i);
+describe("registered books", () => {
+  test.each(["ai-unit-planning", "symphony-kiosk", "companies-platform", "user-management", "educator-platform"])("include %s", (slug) => {
+    expect(projectBookSlugs()).toContain(slug);
   });
 });

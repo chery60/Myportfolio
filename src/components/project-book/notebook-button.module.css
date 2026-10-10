@@ -1,0 +1,114 @@
+/*
+ * The button that opens the project book: a little paper pill with a strip of
+ * masking tape on its corner. Colours are the book's (project-book.module.css,
+ * paper.module.css); it stays paper-coloured in dark mode, as the book does.
+ * Press feedback is CSS, as cube-motion recommends for buttons.
+ */
+
+.button {
+  --notebook-paper: #f8f4ec;
+  --notebook-ink: #2b2620;
+  --notebook-pencil: #2f4a8a;
+  --notebook-marker: #a4442a;
+  --notebook-ease: cubic-bezier(0.2, 0, 0, 1);
+  --notebook-shadow: 0 1px 1px rgb(60 44 24 / 0.1), 0 2px 5px -2px rgb(60 44 24 / 0.18);
+  --notebook-shadow-lifted: 0 1px 1px rgb(60 44 24 / 0.1), 0 8px 16px -8px rgb(60 44 24 / 0.38);
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 15px 0 11px;
+  border: 1px solid rgb(90 70 40 / 0.18);
+  border-radius: 999px;
+  background: var(--notebook-paper);
+  color: var(--notebook-ink);
+  box-shadow: var(--notebook-shadow);
+  cursor: pointer;
+  transition:
+    rotate 240ms var(--notebook-ease),
+    translate 240ms var(--notebook-ease),
+    box-shadow 240ms var(--notebook-ease),
+    scale 120ms var(--notebook-ease);
+}
+
+:global(.dark) .button {
+  --notebook-shadow: 0 1px 1px rgb(0 0 0 / 0.4), 0 2px 6px -2px rgb(0 0 0 / 0.5);
+  --notebook-shadow-lifted: 0 1px 1px rgb(0 0 0 / 0.4), 0 10px 18px -8px rgb(0 0 0 / 0.75);
+  border-color: rgb(255 240 220 / 0.22);
+}
+
+/* Masking tape holding the pill down, as on the photos in the book. */
+.tape {
+  position: absolute;
+  top: -6px;
+  left: 4px;
+  width: 26px;
+  height: 10px;
+  rotate: -14deg;
+  background: rgb(246 232 186 / 0.78);
+  box-shadow: 0 1px 1px rgb(60 44 24 / 0.08);
+  pointer-events: none;
+}
+
+.icon {
+  flex: none;
+  width: 20px;
+  height: 16px;
+  overflow: visible;
+}
+
+.ribbon {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  transition: rotate 320ms var(--notebook-ease);
+}
+
+.label {
+  font-family: var(--font-book-hand), cursive;
+  font-size: 19px;
+  line-height: 1;
+  color: var(--notebook-pencil);
+  /* Caveat sits high in its line box. */
+  translate: 0 1px;
+}
+
+@media (hover: hover) {
+  /* Picked up a little: it tilts, lifts and its bookmark swings. */
+  .button:hover {
+    rotate: -2deg;
+    translate: 0 -1px;
+    box-shadow: var(--notebook-shadow-lifted);
+  }
+
+  .button:hover .ribbon {
+    rotate: 12deg;
+  }
+}
+
+.button:active {
+  scale: 0.97;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--notebook-pencil);
+  outline-offset: 3px;
+}
+
+:global(.dark) .button:focus-visible {
+  outline-color: #e9e2d4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button:hover,
+  .button:active {
+    rotate: none;
+    translate: none;
+    scale: none;
+  }
+
+  .button:hover .ribbon {
+    rotate: none;
+  }
+}

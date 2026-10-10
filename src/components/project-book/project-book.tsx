@@ -70,6 +70,7 @@ export function ProjectBook({ book }: ProjectBookProps) {
 
   const scene = sceneFor(state);
   const loupe = useLoupe({
+    frameRef,
     stageRef,
     toggleRef,
     layerRef,
@@ -79,9 +80,8 @@ export function ProjectBook({ book }: ProjectBookProps) {
     turning: scene.kind === "turn",
   });
 
-  // With the glass out, a tap aims it; otherwise a tap turns toward the side pressed.
-  const handleTap = ({ side, x, y }: TapPoint) =>
-    loupe.open ? loupe.placeAt({ x, y }) : step(side === "right" ? "next" : "prev");
+  // A tap turns toward the side pressed; the glass, resting on the book, is dragged.
+  const handleTap = ({ side }: TapPoint) => step(side === "right" ? "next" : "prev");
   const gesture = useTurnGesture({ layout: state.layout, turn, reducedMotion, onTap: handleTap });
 
   const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
@@ -178,7 +178,7 @@ export function ProjectBook({ book }: ProjectBookProps) {
             </button>
           </BookControls>
           <p className={styles.hint} aria-hidden="true">
-            Drag the page to turn · Magnify the small print
+            Drag the page to turn · Slide the glass over the small print
           </p>
           <p className="sr-only" aria-live="polite" aria-atomic="true">
             {state.navCount > 0 ? positionLabel(book, state.page, state.layout) : ""}
