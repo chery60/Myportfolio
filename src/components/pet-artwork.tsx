@@ -52,8 +52,10 @@ const OUTLINE =
   "drop-shadow(2px 0 0 #111) drop-shadow(-2px 0 0 #111) drop-shadow(0 2px 0 #111) drop-shadow(0 -2px 0 #111)";
 
 const BODY_SHINE = "rgba(255,255,255,0.18)";
-const PET_ARTWORK_SIZE = 76;
+export const PET_ARTWORK_SIZE = 76;
 const PET_PREVIEW_SIZE = 88;
+const PET_IMAGE_MAX_SIZE = 76;
+const PET_PREVIEW_IMAGE_MAX_SIZE = 86;
 
 export const PETS: PetOption[] = [
   {
@@ -293,6 +295,37 @@ export function getPetById(id: PetId) {
   return PETS.find((pet) => pet.id === id) ?? PETS[0];
 }
 
+export type PetImageBox = {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+};
+
+/**
+ * Where a bird's image sits inside its square frame, in pixels.
+ *
+ * The image is centred and may overflow the frame (cursor scales run past
+ * 1), so `left`/`top` can be negative. Everything anchored to the artwork —
+ * eyelids, food, the water bowl — derives from this one box so it cannot
+ * drift from what `BirdImagePet` actually renders.
+ */
+export function getPetImageBox(pet: PetOption, preview = false): PetImageBox {
+  const frameSize = preview ? PET_PREVIEW_SIZE : PET_ARTWORK_SIZE;
+  const maxImageSize = preview ? PET_PREVIEW_IMAGE_MAX_SIZE : PET_IMAGE_MAX_SIZE;
+  const scale = preview ? pet.previewScale : pet.cursorScale;
+  const maxSourceSize = Math.max(pet.sourceWidth, pet.sourceHeight);
+  const width = (maxImageSize * scale * pet.sourceWidth) / maxSourceSize;
+  const height = (maxImageSize * scale * pet.sourceHeight) / maxSourceSize;
+
+  return {
+    left: (frameSize - width) / 2,
+    top: (frameSize - height) / 2,
+    width,
+    height,
+  };
+}
+
 export function PetArtwork({
   petId,
   moving = false,
@@ -330,7 +363,7 @@ export function PetArtwork({
  * Always rendered, always open by default. Whether the eyes are open, half or
  * shut is decided by an ancestor's `data-pet-eyes` attribute in globals.css —
  * that way `PetArtwork` needs no new props, and the pets drawn outside the
- * cursor (the selector grid, the chat avatar, the mobile greeting) stay awake
+ * cursor (the selector grid, the desktop chat avatar) stay awake
  * automatically because nothing above them sets it.
  *
  * Each eye is an oval clipped to the eye's own bounds with a lid inside it, so
@@ -368,6 +401,17 @@ function PetEyelids({ petId }: { petId: PetId }) {
               data-pet-eye-line
               className="absolute left-[12%] right-[12%] top-[64%] h-px rounded-full bg-black/65"
             />
+            {/*
+              The contented "^ ^" eye. Hidden inline so the pets drawn outside
+              the cursor can never show it; only the care and petting
+              animations in pet-motion CSS fade it in, and animations win over
+              inline styles.
+            */}
+            <span
+              data-pet-eye-smile
+              className="absolute left-[16%] right-[16%] top-[34%] h-[42%] rounded-t-full border-x-[1.5px] border-t-[1.5px] border-black/70"
+              style={{ opacity: 0 }}
+            />
           </span>
         </span>
       ))}
@@ -387,11 +431,7 @@ function BirdImagePet({
   shadowRef?: Ref<HTMLDivElement>;
 }) {
   const boxSize = preview ? PET_PREVIEW_SIZE : PET_ARTWORK_SIZE;
-  const maxImageSize = preview ? 86 : 76;
-  const scale = preview ? pet.previewScale : pet.cursorScale;
-  const maxSourceSize = Math.max(pet.sourceWidth, pet.sourceHeight);
-  const width = (maxImageSize * scale * pet.sourceWidth) / maxSourceSize;
-  const height = (maxImageSize * scale * pet.sourceHeight) / maxSourceSize;
+  const { width, height } = getPetImageBox(pet, preview);
 
   return (
     <div

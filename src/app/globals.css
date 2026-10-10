@@ -1,8 +1,17 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "../styles/pet-motion/core.css";
+@import "../styles/pet-motion/signatures.css";
 @plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:where(.dark, .dark *));
+/* Where the pet lives. Mirrors DESKTOP_POINTER_QUERY in pet-cursor.tsx: below
+   it there is no pet, so nothing pet-related (like the picker) shows either. */
+@custom-variant pet-host {
+  @media (min-width: 640px) and (any-hover: hover) and (any-pointer: fine) {
+    @slot;
+  }
+}
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -357,70 +366,9 @@
 }
 
 /*
- * Care reactions use the same animation grammar as the idle gestures: a small
- * anticipation, a readable main action, then a damped settle. The food/water
- * prop travels on a separate layer so the pet can meet it halfway.
+ * The original Play reaction, kept for pets that have no signature move yet.
+ * Eating, drinking and the signature moves live in src/styles/pet-motion/.
  */
-@keyframes petCareEat {
-  0%,
-  100% {
-    transform: translate(0, 0) rotate(0deg) scale(1, 1);
-  }
-
-  14% {
-    transform: translate(1px, 2px) rotate(3deg) scale(1.04, 0.96);
-  }
-
-  32% {
-    transform: translate(-4px, -1px) rotate(-6deg) scale(0.98, 1.03);
-  }
-
-  48%,
-  66%,
-  82% {
-    transform: translate(-2px, 0) rotate(-2deg) scale(1.045, 0.955);
-  }
-
-  57%,
-  74% {
-    transform: translate(-2px, -1px) rotate(2deg) scale(0.985, 1.025);
-  }
-
-  92% {
-    transform: translate(0, -3px) rotate(0deg) scale(0.98, 1.03);
-  }
-}
-
-@keyframes petCareDrink {
-  0%,
-  100% {
-    transform: translateY(0) rotate(0deg) scale(1, 1);
-  }
-
-  16% {
-    transform: translateY(2px) rotate(-2deg) scale(1.03, 0.97);
-  }
-
-  34% {
-    transform: translateY(3px) rotate(5deg) scale(1.02, 0.98);
-  }
-
-  48%,
-  64%,
-  80% {
-    transform: translateY(4px) rotate(5deg) scale(1.035, 0.965);
-  }
-
-  56%,
-  72% {
-    transform: translateY(2px) rotate(3deg) scale(0.99, 1.015);
-  }
-
-  91% {
-    transform: translateY(-3px) rotate(-2deg) scale(0.98, 1.04);
-  }
-}
-
 @keyframes petCarePlay {
   0%,
   100% {
@@ -479,78 +427,12 @@
   }
 }
 
-[data-pet-reaction="eat"] {
-  animation: petCareEat 1.65s cubic-bezier(0.33, 0, 0.2, 1) 1;
-}
-
-[data-pet-reaction="drink"] {
-  animation: petCareDrink 1.7s cubic-bezier(0.33, 0, 0.2, 1) 1;
-}
-
 [data-pet-reaction="play"] {
   animation: petCarePlay 1.35s cubic-bezier(0.25, 0.8, 0.3, 1) 1;
 }
 
 [data-selected-pet="among-us"] [data-pet-reaction="play"] {
   animation-name: petCrewmateFlip;
-}
-
-@keyframes petTreatTravel {
-  0% {
-    opacity: 0;
-    transform: translate(-28px, 8px) rotate(-20deg) scale(0.65);
-  }
-
-  14% {
-    opacity: 1;
-  }
-
-  58% {
-    opacity: 1;
-    transform: translate(22px, -7px) rotate(10deg) scale(1);
-  }
-
-  72%,
-  100% {
-    opacity: 0;
-    transform: translate(32px, -4px) rotate(18deg) scale(0.18);
-  }
-}
-
-@keyframes petWaterDrop {
-  0% {
-    opacity: 0;
-    transform: translateY(-22px) scale(0.55);
-  }
-
-  16% {
-    opacity: 1;
-  }
-
-  64% {
-    opacity: 1;
-    transform: translateY(16px) scale(1);
-  }
-
-  82%,
-  100% {
-    opacity: 0;
-    transform: translateY(24px) scale(0.3);
-  }
-}
-
-[data-pet-care-item="eat"] {
-  bottom: 28px;
-  left: 2px;
-  font-size: 21px;
-  animation: petTreatTravel 1.4s cubic-bezier(0.2, 0.7, 0.25, 1) forwards;
-}
-
-[data-pet-care-item="drink"] {
-  top: 4px;
-  left: 33px;
-  font-size: 19px;
-  animation: petWaterDrop 1.35s cubic-bezier(0.2, 0.7, 0.25, 1) forwards;
 }
 
 @keyframes petPlaySparkle {
@@ -717,7 +599,6 @@
   [data-pet-gesture],
   [data-pet-zzz],
   [data-pet-reaction],
-  [data-pet-care-item],
   [data-pet-play-sparkles] > span,
   [data-pet-idle] [data-pet-shadow],
   [data-pet-gesture] [data-pet-shadow] {

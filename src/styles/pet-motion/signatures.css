@@ -1,0 +1,375 @@
+/*
+ * Pet motion, per character: each pet's signature move (its Play reaction)
+ * and its idle quirk. Keyed off `data-selected-pet` on the cursor pet, with
+ * the matching props in `src/components/pet-signatures.tsx`. Pets are added
+ * one at a time; a pet with no entry here keeps the original Play hop.
+ *
+ * Durations come from `--pet-reaction-ms` / `--pet-gesture-ms`, set from
+ * `playMs` / `quirkMs` in `pet-rig.ts`.
+ */
+
+/* ------------------------------------------------------------------ */
+/* Red — the flock's short-tempered leader. Ability: a sound-wave shout */
+/* ------------------------------------------------------------------ */
+
+/* Battle cry: a big breath in, the shout (with the waves), a proud puff. */
+[data-selected-pet="red"] [data-pet-reaction="play"] {
+  transform-origin: 50% 100%;
+  animation: petRedBattleCry var(--pet-reaction-ms) cubic-bezier(0.3, 0.6, 0.35, 1) both;
+}
+
+[data-selected-pet="red"] [data-pet-reaction="play"] [data-pet-lid] {
+  animation: petAngrySquint var(--pet-reaction-ms) linear both;
+}
+
+@keyframes petRedBattleCry {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+  10% { transform: translate(-1px, 1px) rotate(-3deg) scale(1.03, 0.96); }
+  20% { transform: translate(-3px, 0) rotate(-8deg) scale(1.08, 0.97); }
+  26% { transform: translate(-3px, 0) rotate(-9deg) scale(1.09, 0.98); }
+  30% { transform: translate(4px, 0) rotate(6deg) scale(0.95, 1.06); }
+  33% { transform: translate(5px, 0) rotate(5deg) scale(0.98, 1.03); }
+  36% { transform: translate(4px, 0) rotate(6.5deg) scale(0.97, 1.04); }
+  39% { transform: translate(5px, 0) rotate(4.5deg) scale(0.98, 1.03); }
+  42% { transform: translate(4px, 0) rotate(6.5deg) scale(0.97, 1.04); }
+  45% { transform: translate(5px, 0) rotate(4.5deg) scale(0.98, 1.03); }
+  48% { transform: translate(4px, 0) rotate(6deg) scale(0.97, 1.04); }
+  54% { transform: translate(3px, 0) rotate(4deg) scale(0.99, 1.02); }
+  62% { transform: translate(1px, 0) rotate(0deg) scale(1.03, 0.97); }
+  72% { transform: translate(0, -2px) rotate(-2deg) scale(1.06, 1.03); }
+  84% { transform: translate(0, 0) rotate(0deg) scale(0.99, 1.01); }
+  100% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+}
+
+/* Red's brows are already angry; narrowing the eyes under them sells it. */
+@keyframes petAngrySquint {
+  0%, 12% { transform: translateY(-100%); }
+  18%, 62% { transform: translateY(-58%); }
+  70%, 100% { transform: translateY(-100%); }
+}
+
+[data-pet-fx="soundwave"] {
+  opacity: 0;
+  border-right: 3px solid #dc2626;
+  border-radius: 50%;
+  animation: petSoundWave 520ms ease-out both;
+}
+
+@keyframes petSoundWave {
+  0% { opacity: 0; translate: 0 0; scale: 0.5; }
+  20% { opacity: 1; }
+  100% { opacity: 0; translate: 20px 0; scale: 1.6; }
+}
+
+/* Grumpy huff: tense, shaking with annoyance, then a big huff of steam. */
+[data-selected-pet="red"] [data-pet-gesture="quirk"] {
+  animation: petRedHuff var(--pet-gesture-ms) cubic-bezier(0.3, 0.6, 0.4, 1) both;
+}
+
+[data-selected-pet="red"] [data-pet-gesture="quirk"] [data-pet-lid] {
+  animation: petAngrySquint var(--pet-gesture-ms) linear both;
+}
+
+@keyframes petRedHuff {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+  10% { transform: translate(0, 1px) rotate(0deg) scale(1.03, 0.97); }
+  14% { transform: translate(1px, 1px) rotate(1deg) scale(1.03, 0.97); }
+  18% { transform: translate(-1px, 1px) rotate(-1deg) scale(1.03, 0.97); }
+  22% { transform: translate(1px, 1px) rotate(1deg) scale(1.03, 0.97); }
+  26% { transform: translate(-1px, 1px) rotate(-1deg) scale(1.03, 0.97); }
+  30% { transform: translate(1px, 1px) rotate(1deg) scale(1.03, 0.97); }
+  34% { transform: translate(-1px, 1px) rotate(-1deg) scale(1.03, 0.97); }
+  38% { transform: translate(1px, 1px) rotate(1deg) scale(1.03, 0.97); }
+  42% { transform: translate(0, 0) rotate(0deg) scale(1.03, 0.97); }
+  48% { transform: translate(0, 0) rotate(0deg) scale(1.07, 0.95); }
+  58% { transform: translate(0, -1px) rotate(0deg) scale(0.96, 1.04); }
+  70% { transform: translate(0, 0) rotate(0deg) scale(1.01, 0.99); }
+  100% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+}
+
+/* ------------------------------------------------------------------ */
+/* Chuck — the fastest bird on the island. Ability: a speed burst       */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Speed burst: turn and rev up (a determined squint, feet scrabbling), zoom
+ * off as a stretched smear, skid to a stop leaning back, turn, zoom home, skid
+ * again, and strike a pleased pose. The path is the `translate` property and
+ * the body `transform`, so they compose; the speed-line tracks in
+ * pet-signatures.tsx run the same path and stop where `CHUCK_FAR_STOP_X` says.
+ */
+[data-selected-pet="chuck"] [data-pet-reaction="play"] {
+  transform-origin: 50% 100%;
+  animation:
+    petChuckZoomPath var(--pet-reaction-ms) cubic-bezier(0.5, 0, 0.3, 1) both,
+    petChuckZoomBody var(--pet-reaction-ms) cubic-bezier(0.3, 0.6, 0.4, 1) both;
+}
+
+[data-selected-pet="chuck"] [data-pet-reaction="play"] [data-pet-lid] {
+  animation: petChuckZoomLids var(--pet-reaction-ms) linear both;
+}
+
+[data-selected-pet="chuck"] [data-pet-reaction="play"] [data-pet-eye-smile] {
+  animation: petChuckProudSmile var(--pet-reaction-ms) linear both;
+}
+
+@keyframes petChuckZoomPath {
+  0%, 16% { translate: 0 0; }
+  24% { translate: -56px 0; }
+  30%, 46% { translate: -64px 0; }
+  52% { translate: 6px 0; }
+  58%, 100% { translate: 0 0; }
+}
+
+/* Facing left, the flip mirrors rotation: positive leans him back there. */
+@keyframes petChuckZoomBody {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+  5% { transform: translate(0, 0) rotate(0deg) scale(0.93, 1.04); }
+  9% { transform: translate(0, 0) rotate(0deg) scale(-1, 1); }
+  11% { transform: translate(1px, 0) rotate(6deg) scale(-1.08, 0.9); }
+  13% { transform: translate(-1px, 0) rotate(7deg) scale(-1.1, 0.88); }
+  15% { transform: translate(1px, 0) rotate(7deg) scale(-1.1, 0.88); }
+  17% { transform: translate(0, 0) rotate(-8deg) scale(-1.28, 0.84); }
+  24% { transform: translate(0, 0) rotate(-8deg) scale(-1.22, 0.87); }
+  28% { transform: translate(0, 0) rotate(12deg) scale(-1.06, 0.92); }
+  33% { transform: translate(0, 0) rotate(4deg) scale(-1.02, 0.98); }
+  37% { transform: translate(0, 0) rotate(0deg) scale(-1, 1); }
+  40% { transform: translate(0, 0) rotate(0deg) scale(-0.92, 1.04); }
+  43% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+  45% { transform: translate(0, 0) rotate(-7deg) scale(1.1, 0.88); }
+  47% { transform: translate(0, 0) rotate(8deg) scale(1.28, 0.84); }
+  51% { transform: translate(0, 0) rotate(8deg) scale(1.22, 0.87); }
+  54% { transform: translate(0, 0) rotate(-12deg) scale(1.06, 0.92); }
+  58% { transform: translate(0, 0) rotate(-4deg) scale(1.02, 0.98); }
+  62% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+  70% { transform: translate(0, -5px) rotate(0deg) scale(0.96, 1.06); }
+  78% { transform: translate(0, 0) rotate(0deg) scale(1.05, 0.95); }
+  86% { transform: translate(0, 0) rotate(0deg) scale(0.99, 1.01); }
+  100% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+}
+
+@keyframes petChuckZoomLids {
+  0%, 8% { transform: translateY(-100%); }
+  10%, 16% { transform: translateY(-58%); }
+  18%, 38% { transform: translateY(-100%); }
+  41% { transform: translateY(0); }
+  44%, 66% { transform: translateY(-100%); }
+  70%, 84% { transform: translateY(0); }
+  90%, 100% { transform: translateY(-100%); }
+}
+
+@keyframes petChuckProudSmile {
+  0%, 68% { opacity: 0; }
+  71%, 84% { opacity: 1; }
+  88%, 100% { opacity: 0; }
+}
+
+[data-pet-fx-track="chuck-out"],
+[data-pet-fx-track="chuck-back"] {
+  animation: petChuckZoomPath var(--pet-reaction-ms) cubic-bezier(0.5, 0, 0.3, 1) both;
+}
+
+[data-pet-fx="speedline"] {
+  opacity: 0;
+  background: rgba(148, 163, 184, 0.9);
+}
+
+/* Lines grow away from his back, so they read as the wake he leaves. */
+[data-pet-fx-track="chuck-out"] [data-pet-fx="speedline"] {
+  transform-origin: 0 50%;
+  animation: petSpeedlineOut var(--pet-reaction-ms) linear both;
+}
+
+[data-pet-fx-track="chuck-back"] [data-pet-fx="speedline"] {
+  transform-origin: 100% 50%;
+  animation: petSpeedlineBack var(--pet-reaction-ms) linear both;
+}
+
+@keyframes petSpeedlineOut {
+  0%, 16% { opacity: 0; scale: 0.3 1; }
+  18% { opacity: 1; scale: 1 1; }
+  25% { opacity: 0.9; scale: 1.2 1; }
+  30%, 100% { opacity: 0; scale: 0.4 1; }
+}
+
+@keyframes petSpeedlineBack {
+  0%, 46% { opacity: 0; scale: 0.3 1; }
+  48% { opacity: 1; scale: 1 1; }
+  52% { opacity: 0.9; scale: 1.2 1; }
+  56%, 100% { opacity: 0; scale: 0.4 1; }
+}
+
+/*
+ * Restless crash: bouncing on the spot, darting glances (hundreds of thoughts
+ * a minute), then the battery dies mid-fidget — he nods off for a beat and
+ * jolts awake, then checks whether anyone saw.
+ */
+[data-selected-pet="chuck"] [data-pet-gesture="quirk"] {
+  animation: petChuckCrash var(--pet-gesture-ms) cubic-bezier(0.3, 0.6, 0.4, 1) both;
+}
+
+[data-selected-pet="chuck"] [data-pet-gesture="quirk"] [data-pet-lid] {
+  animation: petChuckCrashLids var(--pet-gesture-ms) linear both;
+}
+
+[data-selected-pet="chuck"] [data-pet-gesture="quirk"] [data-pet-eye-line] {
+  animation: petChuckCrashLine var(--pet-gesture-ms) linear both;
+}
+
+@keyframes petChuckCrash {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+  4% { transform: translate(0, -3px) rotate(0deg) scale(0.97, 1.04); }
+  8% { transform: translate(0, 0) rotate(0deg) scale(1.05, 0.95); }
+  12% { transform: translate(0, -3px) rotate(0deg) scale(0.97, 1.04); }
+  16% { transform: translate(0, 0) rotate(0deg) scale(1.05, 0.95); }
+  20% { transform: translate(0, -3px) rotate(0deg) scale(0.97, 1.04); }
+  /* The darting glances snap rather than turn: an eased flip this short just
+     shows him edge-on for a frame or two. */
+  24% { transform: translate(0, 0) rotate(0deg) scale(1.05, 0.95); animation-timing-function: steps(1, end); }
+  27% { transform: translate(0, 0) rotate(0deg) scale(-1, 1); animation-timing-function: steps(1, end); }
+  31% { transform: translate(0, 0) rotate(0deg) scale(1, 1); animation-timing-function: steps(1, end); }
+  35% { transform: translate(0, 0) rotate(0deg) scale(-1, 1); animation-timing-function: steps(1, end); }
+  39% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+  44% { transform: translate(0, 0) rotate(0deg) scale(1.02, 0.98); }
+  50% { transform: translate(0, 2px) rotate(-9deg) scale(1.04, 0.95); }
+  58% { transform: translate(0, 2px) rotate(-10deg) scale(1.05, 0.94); }
+  63% { transform: translate(0, 2px) rotate(-9deg) scale(1.04, 0.95); }
+  67% { transform: translate(0, -8px) rotate(2deg) scale(0.92, 1.1); }
+  73% { transform: translate(0, 0) rotate(0deg) scale(1.08, 0.92); }
+  79% { transform: translate(0, 0) rotate(0deg) scale(0.98, 1.02); }
+  86% { transform: translate(0, 0) rotate(-4deg) scale(1, 1); }
+  92% { transform: translate(0, 0) rotate(3deg) scale(1, 1); }
+  100% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+}
+
+@keyframes petChuckCrashLids {
+  0%, 44% { transform: translateY(-100%); }
+  48% { transform: translateY(-50%); }
+  51%, 64% { transform: translateY(0); }
+  66%, 100% { transform: translateY(-100%); }
+}
+
+@keyframes petChuckCrashLine {
+  0%, 50% { opacity: 0; }
+  52%, 64% { opacity: 1; }
+  66%, 100% { opacity: 0; }
+}
+
+[data-pet-fx="snooze"] {
+  opacity: 0;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted-foreground);
+  animation: petSnoozeDrift 520ms ease-out both;
+}
+
+@keyframes petSnoozeDrift {
+  0% { opacity: 0; translate: 0 2px; scale: 0.6; }
+  25% { opacity: 0.9; }
+  100% { opacity: 0; translate: 6px -8px; scale: 1.1; }
+}
+
+[data-pet-fx="exclaim"] {
+  opacity: 0;
+  font-size: 14px;
+  font-weight: 800;
+  color: #f59e0b;
+  animation: petExclaimPop 560ms cubic-bezier(0.3, 1.4, 0.5, 1) both;
+}
+
+@keyframes petExclaimPop {
+  0% { opacity: 0; scale: 0.2; translate: 0 4px; }
+  25% { opacity: 1; scale: 1.3; translate: 0 -2px; }
+  45% { scale: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; translate: 0 -5px; }
+}
+
+/*
+ * Gobble: everything Chuck does is at lightning speed, eating included. Bursts
+ * of three pecks land on the same bite beats as everyone else's single peck
+ * (26%, 46%, 66%, so the food and crumbs stay in sync), with a canary-fast
+ * buzzing chew in between instead of a calm munch.
+ */
+[data-selected-pet="chuck"] [data-pet-reaction="eat"] {
+  animation-name: petChuckGobble;
+}
+
+@keyframes petChuckGobble {
+  0%, 5% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+  8% { transform: translate(-1px, 0) rotate(-6deg) scale(1.04, 0.95); }
+  11% { transform: translate(0, -5px) rotate(-2deg) scale(0.96, 1.06); }
+  14% { transform: translate(0, 0) rotate(0deg) scale(1.05, 0.95); }
+  19% { transform: translate(-1px, 0) rotate(-6deg) scale(1.02, 0.98); }
+  22% { transform: translate(2px, 1px) rotate(15deg) scale(1.02, 0.98); }
+  24% { transform: translate(1px, 0) rotate(3deg) scale(1, 1); }
+  26% { transform: translate(2px, 1px) rotate(16deg) scale(1.03, 0.97); }
+  28% { transform: translate(1px, 0) rotate(3deg) scale(1, 1); }
+  30% { transform: translate(2px, 1px) rotate(15deg) scale(1.02, 0.98); }
+  32% { transform: translate(0, 0) rotate(1deg) scale(1, 1); }
+  33% { transform: translate(0, 0) rotate(1deg) scale(1.03, 0.97); }
+  34% { transform: translate(0, 0) rotate(1deg) scale(0.98, 1.02); }
+  35% { transform: translate(0, 0) rotate(1deg) scale(1.03, 0.97); }
+  36% { transform: translate(0, 0) rotate(1deg) scale(0.98, 1.02); }
+  37% { transform: translate(0, 0) rotate(1deg) scale(1.03, 0.97); }
+  38% { transform: translate(0, 0) rotate(1deg) scale(0.98, 1.02); }
+  40% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+  42% { transform: translate(2px, 1px) rotate(15deg) scale(1.02, 0.98); }
+  44% { transform: translate(1px, 0) rotate(3deg) scale(1, 1); }
+  46% { transform: translate(2px, 1px) rotate(16deg) scale(1.03, 0.97); }
+  48% { transform: translate(1px, 0) rotate(3deg) scale(1, 1); }
+  50% { transform: translate(2px, 1px) rotate(15deg) scale(1.02, 0.98); }
+  52% { transform: translate(0, 0) rotate(1deg) scale(1, 1); }
+  53% { transform: translate(0, 0) rotate(1deg) scale(1.03, 0.97); }
+  54% { transform: translate(0, 0) rotate(1deg) scale(0.98, 1.02); }
+  55% { transform: translate(0, 0) rotate(1deg) scale(1.03, 0.97); }
+  56% { transform: translate(0, 0) rotate(1deg) scale(0.98, 1.02); }
+  57% { transform: translate(0, 0) rotate(1deg) scale(1.03, 0.97); }
+  58% { transform: translate(0, 0) rotate(1deg) scale(0.98, 1.02); }
+  60% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+  62% { transform: translate(2px, 1px) rotate(15deg) scale(1.02, 0.98); }
+  64% { transform: translate(1px, 0) rotate(3deg) scale(1, 1); }
+  66% { transform: translate(2px, 1px) rotate(17deg) scale(1.03, 0.97); }
+  68% { transform: translate(1px, 0) rotate(3deg) scale(1, 1); }
+  70% { transform: translate(2px, 1px) rotate(14deg) scale(1.02, 0.98); }
+  72% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+  73% { transform: translate(0, 0) rotate(0deg) scale(1.035, 0.965); }
+  74% { transform: translate(0, 0) rotate(0deg) scale(0.98, 1.02); }
+  75% { transform: translate(0, 0) rotate(0deg) scale(1.035, 0.965); }
+  76% { transform: translate(0, 0) rotate(0deg) scale(0.98, 1.02); }
+  77% { transform: translate(0, 0) rotate(0deg) scale(1.035, 0.965); }
+  78% { transform: translate(0, 0) rotate(0deg) scale(0.98, 1.02); }
+  79% { transform: translate(0, 0) rotate(0deg) scale(1.035, 0.965); }
+  80% { transform: translate(0, 0) rotate(0deg) scale(0.98, 1.02); }
+  82% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+  85% { transform: translate(0, -1px) rotate(-2deg) scale(0.95, 1.06); }
+  88% { transform: translate(0, 0) rotate(0deg) scale(1.03, 0.97); }
+  91% { transform: translate(0, -6px) rotate(0deg) scale(0.96, 1.05); }
+  93.5% { transform: translate(0, 0) rotate(0deg) scale(1.06, 0.94); }
+  96% { transform: translate(0, -3px) rotate(0deg) scale(0.98, 1.02); }
+  98% { transform: translate(0, 0) rotate(0deg) scale(1.03, 0.97); }
+  100% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+}
+
+/* ------------------------------------------------------------------ */
+/* Reduced motion                                                       */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Matches the specificity of the per-pet rules above so it always wins. The
+ * props are listed again here even though core.css stops them too: this file
+ * is imported after core.css, so its own prop rules would otherwise win.
+ */
+@media (prefers-reduced-motion: reduce) {
+  [data-selected-pet] [data-pet-reaction],
+  [data-selected-pet] [data-pet-gesture],
+  [data-selected-pet] [data-pet-reaction] [data-pet-lid],
+  [data-selected-pet] [data-pet-reaction] [data-pet-eye-smile],
+  [data-selected-pet] [data-pet-gesture] [data-pet-lid],
+  [data-selected-pet] [data-pet-gesture] [data-pet-eye-line],
+  [data-pet-fx-track],
+  [data-pet-fx-track] [data-pet-fx],
+  [data-pet-fx] {
+    animation: none;
+  }
+}

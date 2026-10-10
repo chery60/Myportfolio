@@ -6,6 +6,7 @@ import {
   ArrowUpIcon,
   BriefcaseBusinessIcon,
   FolderOpenDotIcon,
+  MessageCircleIcon,
   MessagesSquareIcon,
   RouteIcon,
   SparklesIcon,
@@ -293,9 +294,14 @@ export function PetChatPanel({ onClose, isDesktop, reducedMotion }: Props) {
             aria-hidden="true"
               className="relative grid size-9 shrink-0 place-items-center overflow-hidden rounded-xl border border-indigo-200/70 bg-gradient-to-br from-indigo-50 via-background to-sky-50 shadow-[0_5px_16px_-9px_rgba(79,70,229,0.8)] dark:border-indigo-400/20 dark:from-indigo-950/70 dark:to-sky-950/40"
           >
-              <span className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[47%] scale-[0.42]">
-              <PetArtwork petId={selectedPet} />
-            </span>
+              {/* Mobile has no pet anywhere, so the avatar falls back to an icon. */}
+              {isDesktop ? (
+                <span className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[47%] scale-[0.42]">
+                  <PetArtwork petId={selectedPet} />
+                </span>
+              ) : (
+                <MessageCircleIcon className="size-4 text-indigo-600 dark:text-indigo-300" />
+              )}
           </span>
           <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold leading-tight tracking-[-0.01em]">
@@ -399,11 +405,15 @@ export function PetChatPanel({ onClose, isDesktop, reducedMotion }: Props) {
             </Conversation>
 
             {showStarters ? (
-              <div className="shrink-0 border-t border-border/45 bg-muted/15 px-3 pb-3 pt-2.5">
-                <p className="mb-2 px-1 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/80">
+              <div className="shrink-0 border-t border-border/45 bg-muted/15 px-2 pb-2 pt-2.5">
+                <p className="mb-1 px-2 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/80">
                   Try asking
                 </p>
-                <Suggestions className="grid w-full grid-cols-2 gap-2">
+                {/* `Suggestions` scrolls inside a Radix ScrollArea, whose
+                    viewport clips. The inner padding gives a hovered chip room
+                    to lift (and cast its shadow) without losing its top border;
+                    the wrapper's padding is trimmed by the same 4px to match. */}
+                <Suggestions className="grid w-full grid-cols-2 gap-2 p-1">
                 {STARTERS.map((starter) => (
                   <Suggestion
                       key={starter.prompt}
@@ -496,20 +506,38 @@ export function PetChatPanel({ onClose, isDesktop, reducedMotion }: Props) {
 
         </div>
 
-        {/* Two layers make the pointer read as part of the shell: the outer
-            diamond supplies a crisp silhouette and the inner one carries the
-            card surface over it. Both sit behind the clipped card. */}
+        {/* The pointer sits *on top of* the card, not behind it. Its top edge
+            overlaps the card's bottom border by a pixel and is filled with the
+            same surface as the input area there (card, plus the muted wash),
+            so it erases the border where they join; only its two slanted sides
+            are stroked. The result reads as one shell rather than a tip
+            peeking out from behind the panel. */}
         {isDesktop ? (
-          <>
-            <span
-              aria-hidden="true"
-              className="absolute -bottom-[8px] right-7 z-0 size-4 rotate-45 border-b border-r border-foreground/20 bg-card shadow-[5px_5px_12px_-8px_rgba(15,23,42,0.65)] dark:border-white/20"
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 22 11"
+            width={22}
+            height={11}
+            className="pointer-events-none absolute z-20 overflow-visible"
+            // Theme variables, not utility classes: the fills must match the
+            // card exactly in both themes, and `--foreground` at ~11% is the
+            // card's own border colour in light and dark alike.
+            style={{
+              right: 25,
+              bottom: -10,
+              filter: "drop-shadow(0 5px 4px rgba(15, 23, 42, 0.1))",
+            }}
+          >
+            <path d="M0 0 L11 11 L22 0 Z" fill="var(--card)" />
+            <path d="M0 0 L11 11 L22 0 Z" fill="var(--muted)" fillOpacity={0.15} />
+            <path
+              d="M0.5 0 L11 10.5 L21.5 0"
+              fill="none"
+              stroke="var(--foreground)"
+              strokeOpacity={0.11}
+              strokeWidth={1}
             />
-            <span
-              aria-hidden="true"
-              className="absolute -bottom-[5px] right-[31px] z-0 size-3 rotate-45 bg-card"
-            />
-          </>
+          </svg>
         ) : null}
       </div>
     </>

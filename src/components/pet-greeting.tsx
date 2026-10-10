@@ -3,9 +3,7 @@
 import { XIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-import { PetArtwork } from "@/components/pet-artwork";
 import { usePetChatOpen } from "@/components/use-pet-chat";
-import { useSelectedPet } from "@/components/use-selected-pet";
 import {
   PET_BUBBLE_OFFSET_BOTTOM,
   setPetParked,
@@ -23,6 +21,11 @@ const SETTLE_DELAY_MS = 400;
 /** A page too short to scroll would never greet; offer it on a timer instead. */
 const NO_SCROLL_FALLBACK_MS = 2500;
 const SESSION_KEY_PREFIX = "portfolio-walkthrough-greeted:";
+/**
+ * Mobile only: clears the chat launcher button, which sits at bottom 80px and
+ * is 56px tall (`bottom-20 size-14` in pet-chat-launcher.tsx), plus a 12px gap.
+ */
+const MOBILE_BUBBLE_OFFSET_BOTTOM = 148;
 
 interface Props {
   /** Used to remember, per browser session, that this project already greeted. */
@@ -56,12 +59,10 @@ function rememberGreeted(slug: string) {
  *
  * On desktop the bubble is anchored to the spot the pet parks in, so it reads
  * as the pet talking whether the pet is sitting in its corner or chasing the
- * cursor. Below the desktop gate `PetCursor` renders nothing, so this draws its
- * own sprite beside the message instead — the walkthrough must stay reachable
- * on a phone.
+ * cursor. Below the desktop gate there is no pet at all, so the bubble stands
+ * on its own — the walkthrough must stay reachable on a phone.
  */
 export function PetGreeting({ slug, videoId, title, duration }: Props) {
-  const selectedPet = useSelectedPet();
   const [isDesktop, setIsDesktop] = useState(false);
   const [showBubble, setShowBubble] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -169,16 +170,13 @@ export function PetGreeting({ slug, videoId, title, duration }: Props) {
             "not-prose fixed right-4 z-40 flex max-w-[min(20rem,calc(100vw-2rem))] items-end gap-2 sm:right-6",
             "motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-300"
           )}
-          style={{ bottom: isDesktop ? PET_BUBBLE_OFFSET_BOTTOM : 96 }}
+          style={{
+            bottom: isDesktop
+              ? PET_BUBBLE_OFFSET_BOTTOM
+              : MOBILE_BUBBLE_OFFSET_BOTTOM,
+          }}
           role="status"
         >
-          {/* Mobile has no PetCursor, so the greeting brings its own pet. */}
-          {!isDesktop && (
-            <div className="shrink-0" aria-hidden="true">
-              <PetArtwork petId={selectedPet} />
-            </div>
-          )}
-
           <div className="relative rounded-2xl border border-border bg-card px-3 py-2.5 text-card-foreground shadow-[0_18px_50px_-24px_rgba(0,0,0,0.55)]">
             <button
               type="button"

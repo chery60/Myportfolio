@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { PetId } from "@/components/pet-artwork";
+import {
+  getGestureDuration,
+  getGesturePalette,
+  pickGesture,
+  type PetGesture,
+} from "@/components/pet-rig";
 
 /**
  * Idle life for the parked pet.
@@ -15,7 +22,8 @@ import { useEffect, useRef, useState } from "react";
  * split the walk and flight animations already use.
  */
 export type PetIdlePhase = "awake" | "drowsy" | "asleep";
-export type PetIdleGesture = "none" | "hop" | "wiggle" | "stretch" | "startle";
+/** Which gestures a pet picks, and how long each lasts, is per pet: see `pet-rig.ts`. */
+export type PetIdleGesture = PetGesture;
 /** How far the eyelids are down. `half` is the drowsy resting pose. */
 export type PetEyes = "open" | "half" | "closed";
 
@@ -43,15 +51,6 @@ const ASLEEP_AFTER_MS = 32_000;
 const GESTURE_MIN_DELAY_MS = 7_000;
 const GESTURE_MAX_DELAY_MS = 14_000;
 
-const GESTURE_DURATIONS: Record<Exclude<PetIdleGesture, "none">, number> = {
-  hop: 620,
-  wiggle: 900,
-  stretch: 1_100,
-  startle: 520,
-};
-
-const AMBIENT_GESTURES = ["hop", "wiggle", "stretch"] as const;
-
 /** Anything that means a human is still on the page. */
 const ACTIVITY_EVENTS = [
   "pointerdown",
@@ -65,10 +64,15 @@ function randomBetween(min: number, max: number) {
   return min + Math.random() * (max - min);
 }
 
-export function usePetIdle(enabled: boolean): {
+export function usePetIdle(
+  enabled: boolean,
+  petId: PetId
+): {
   phase: PetIdlePhase;
   gesture: PetIdleGesture;
   eyes: PetEyes;
+  /** Perform a gesture now. Does nothing while the idle machine is disabled. */
+  trigger: (gesture: Exclude<PetIdleGesture, "none">) => void;
 } {
   const [phase, setPhase] = useState<PetIdlePhase>("awake");
   const [gesture, setGesture] = useState<PetIdleGesture>("none");
@@ -79,6 +83,17 @@ export function usePetIdle(enabled: boolean): {
   // down and rebuilt every time the pet nods off. It is only ever written from
   // inside the effect, never during render.
   const phaseRef = useRef<PetIdlePhase>("awake");
+  // Same reasoning for the pet: switching pets changes the palette the next
+  // gesture is drawn from without restarting the sleep countdown.
+  const petIdRef = useRef<PetId>(petId);
+  const lastGestureRef = useRef<PetIdleGesture>("none");
+  const triggerRef = useRef<(next: Exclude<PetIdleGesture, "none">) => void>(
+    () => {}
+  );
+
+  useEffect(() => {
+    petIdRef.current = petId;
+  }, [petId]);
 
   useEffect(() => {
     if (!enabled) {
@@ -93,9 +108,15 @@ export function usePetIdle(enabled: boolean): {
       if (phaseRef.current === next) {
         return;
       }
+      const previous = phaseRef.current;
       phaseRef.current = next;
       setPhase(next);
       setEyes(next === "asleep" ? "closed" : next === "drowsy" ? "half" : "open");
+      // Animals yawn on the way down, not out of nowhere: it is the one cue
+      // that tells the visitor the pet is getting sleepy before its eyes close.
+      if (previous === "awake" && next === "drowsy") {
+        runGesture("yawn");
+      }
     };
 
     let drowsyTimer: number | undefined;
@@ -105,13 +126,16 @@ export function usePetIdle(enabled: boolean): {
     let blinkTimer: number | undefined;
     let blinkHoldTimer: number | undefined;
 
-    const runGesture = (next: Exclude<PetIdleGesture, "none">) => {
+    // A function declaration so `applyPhase` above can call it: both are only
+    // invoked after this effect body has finished running.
+    function runGesture(next: Exclude<PetIdleGesture, "none">) {
+      lastGestureRef.current = next;
       setGesture(next);
       window.clearTimeout(gestureEndTimer);
       gestureEndTimer = window.setTimeout(() => {
         setGesture("none");
-      }, GESTURE_DURATIONS[next]);
-    };
+      }, getGestureDuration(petIdRef.current, next));
+    }
 
     const scheduleAmbientGesture = () => {
       window.clearTimeout(gestureTimer);
@@ -119,12 +143,17 @@ export function usePetIdle(enabled: boolean): {
         // A sleeping pet keeps still; it will pick this back up on waking.
         if (phaseRef.current === "awake") {
           runGesture(
-            AMBIENT_GESTURES[Math.floor(Math.random() * AMBIENT_GESTURES.length)]
+            pickGesture(
+              getGesturePalette(petIdRef.current),
+              lastGestureRef.current
+            )
           );
         }
         scheduleAmbientGesture();
       }, randomBetween(GESTURE_MIN_DELAY_MS, GESTURE_MAX_DELAY_MS));
     };
+
+    triggerRef.current = runGesture;
 
     /** The lid position the pet returns to between blinks. */
     const restingEyes = (): PetEyes =>
@@ -201,6 +230,7 @@ export function usePetIdle(enabled: boolean): {
     scheduleBlink();
 
     return () => {
+      triggerRef.current = () => {};
       window.cancelAnimationFrame(resetFrame);
       for (const event of ACTIVITY_EVENTS) {
         window.removeEventListener(event, wake);
@@ -214,9 +244,19 @@ export function usePetIdle(enabled: boolean): {
     };
   }, [enabled]);
 
+  const trigger = useCallback(
+    (next: Exclude<PetIdleGesture, "none">) => triggerRef.current(next),
+    []
+  );
+
   // Guarded rather than reset: while the pet follows the cursor it is never
   // idle, whatever the machine above happens to be holding.
   return enabled
-    ? { phase, gesture, eyes }
-    : { phase: "awake" as const, gesture: "none" as const, eyes: "open" as const };
+    ? { phase, gesture, eyes, trigger }
+    : {
+        phase: "awake" as const,
+        gesture: "none" as const,
+        eyes: "open" as const,
+        trigger,
+      };
 }

@@ -1,0 +1,737 @@
+/*
+ * Pet motion, shared by every pet: care reactions, idle gestures, the corner
+ * wander, cursor attention, and the props that go with them.
+ *
+ * Durations are not written here. `pet-cursor.tsx` sets `--pet-reaction-ms`
+ * and `--pet-gesture-ms` from `pet-rig.ts`, so a heavy pet does the same move
+ * more slowly and the JS timer that ends it can never disagree with the CSS.
+ * Props in `pet-care-scene.tsx` / `pet-gesture-fx.tsx` start at the same
+ * fractions of those durations as the beats below.
+ *
+ * Everything is scoped under `[data-pet-cursor]` (or attributes only the
+ * cursor pet writes), so the pets drawn in the selector, chat and greeting
+ * never animate. Only transform and opacity are animated.
+ */
+
+/* ------------------------------------------------------------------ */
+/* Attention: lean toward the cursor, squish when petted                */
+/* ------------------------------------------------------------------ */
+
+[data-pet-attention] {
+  rotate: var(--pet-look-rotate, 0deg);
+  translate: var(--pet-look-x, 0px) 0;
+  transform-origin: 50% 100%;
+  transition:
+    rotate 480ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    translate 480ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+[data-pet-attention][data-pet-petted] {
+  animation: petPetted 1.2s cubic-bezier(0.3, 0.7, 0.4, 1) both;
+}
+
+[data-pet-petted] [data-pet-lid] {
+  animation: petHappyLids 1.2s ease-out both;
+}
+
+[data-pet-petted] [data-pet-eye-smile] {
+  animation: petHappySmile 1.2s ease-out both;
+}
+
+@keyframes petPetted {
+  0% { scale: 1 1; }
+  14% { scale: 1.07 0.93; }
+  30% { scale: 0.96 1.04; }
+  46% { scale: 1.03 0.97; }
+  62% { scale: 0.99 1.01; }
+  100% { scale: 1 1; }
+}
+
+@keyframes petHappyLids {
+  0% { transform: translateY(-100%); }
+  12%, 82% { transform: translateY(0); }
+  100% { transform: translateY(-100%); }
+}
+
+@keyframes petHappySmile {
+  0%, 10% { opacity: 0; }
+  16%, 80% { opacity: 1; }
+  90%, 100% { opacity: 0; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Eat: notice, three pecks with chewing, gulp, contented hop           */
+/* ------------------------------------------------------------------ */
+
+/* Pecks and sips pivot on the front of the body, under the beak. */
+[data-pet-cursor] [data-pet-reaction="eat"],
+[data-pet-cursor] [data-pet-reaction="drink"] {
+  transform-origin: var(--pet-pivot-x, 50%) 100%;
+}
+
+[data-pet-cursor] [data-pet-reaction="eat"] {
+  animation: petEat var(--pet-reaction-ms) cubic-bezier(0.33, 0, 0.2, 1) both;
+}
+
+@keyframes petEat {
+  0%, 6% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+  10% { transform: translate(-1px, 0) rotate(-5deg) scale(1.03, 0.96); }
+  14% { transform: translate(0, -4px) rotate(-2deg) scale(0.97, 1.05); }
+  18% { transform: translate(0, 0) rotate(-4deg) scale(1.04, 0.96); }
+  22% { transform: translate(-1px, 0) rotate(-7deg) scale(1.02, 0.98); }
+  26% { transform: translate(2px, 1px) rotate(16deg) scale(1.03, 0.97); }
+  29% { transform: translate(1px, 0) rotate(4deg) scale(0.99, 1.02); }
+  32% { transform: translate(0, 0) rotate(1deg) scale(1.035, 0.965); }
+  35% { transform: translate(0, 0) rotate(1deg) scale(0.99, 1.015); }
+  38% { transform: translate(0, 0) rotate(1deg) scale(1.035, 0.965); }
+  42% { transform: translate(-1px, 0) rotate(-6deg) scale(1.01, 0.99); }
+  46% { transform: translate(2px, 1px) rotate(16deg) scale(1.03, 0.97); }
+  49% { transform: translate(1px, 0) rotate(4deg) scale(0.99, 1.02); }
+  52% { transform: translate(0, 0) rotate(1deg) scale(1.035, 0.965); }
+  55% { transform: translate(0, 0) rotate(1deg) scale(0.99, 1.015); }
+  58% { transform: translate(0, 0) rotate(1deg) scale(1.035, 0.965); }
+  62% { transform: translate(-1px, 0) rotate(-6deg) scale(1.01, 0.99); }
+  66% { transform: translate(2px, 1px) rotate(17deg) scale(1.03, 0.97); }
+  69% { transform: translate(1px, 0) rotate(4deg) scale(0.99, 1.02); }
+  72% { transform: translate(0, 0) rotate(0deg) scale(1.04, 0.96); }
+  74% { transform: translate(0, 0) rotate(0deg) scale(0.985, 1.02); }
+  76% { transform: translate(0, 0) rotate(0deg) scale(1.04, 0.96); }
+  78% { transform: translate(0, 0) rotate(0deg) scale(0.985, 1.02); }
+  80% { transform: translate(0, 0) rotate(0deg) scale(1.04, 0.96); }
+  83% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+  87% { transform: translate(0, -1px) rotate(-2deg) scale(0.95, 1.06); }
+  90% { transform: translate(0, 0) rotate(0deg) scale(1.03, 0.97); }
+  94% { transform: translate(0, -5px) rotate(0deg) scale(0.97, 1.04); }
+  97% { transform: translate(0, 0) rotate(0deg) scale(1.04, 0.96); }
+  100% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+}
+
+/* A protective blink as the beak lands, then "^ ^" while chewing. */
+[data-pet-cursor] [data-pet-reaction="eat"] [data-pet-lid] {
+  animation: petEatLids var(--pet-reaction-ms) linear both;
+}
+
+[data-pet-cursor] [data-pet-reaction="eat"] [data-pet-eye-smile] {
+  animation: petEatSmile var(--pet-reaction-ms) linear both;
+}
+
+@keyframes petEatLids {
+  0%, 24% { transform: translateY(-100%); }
+  26% { transform: translateY(-56%); }
+  29%, 44% { transform: translateY(-100%); }
+  46% { transform: translateY(-56%); }
+  49%, 64% { transform: translateY(-100%); }
+  66% { transform: translateY(-56%); }
+  69% { transform: translateY(-100%); }
+  72%, 84% { transform: translateY(0); }
+  87%, 91% { transform: translateY(-100%); }
+  93%, 99% { transform: translateY(0); }
+  100% { transform: translateY(-100%); }
+}
+
+@keyframes petEatSmile {
+  0%, 71% { opacity: 0; }
+  73%, 84% { opacity: 1; }
+  86%, 92% { opacity: 0; }
+  94%, 99% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* The treat drops in, jolts at each peck, and is gone on the third. */
+[data-pet-food] {
+  transform-origin: 50% 100%;
+  animation: petFoodDrop var(--pet-reaction-ms) cubic-bezier(0.3, 0.7, 0.4, 1) both;
+}
+
+@keyframes petFoodDrop {
+  0% { opacity: 0; transform: translateY(-22px) rotate(-10deg) scale(0.8, 0.8); }
+  4% { opacity: 1; transform: translateY(-6px) rotate(-4deg) scale(0.95, 1.05); }
+  7% { transform: translateY(0) rotate(0deg) scale(1.12, 0.86); }
+  9% { transform: translateY(-2px) rotate(0deg) scale(0.96, 1.04); }
+  11%, 25.5% { transform: translateY(0) rotate(0deg) scale(1, 1); }
+  27% { transform: translateY(0) rotate(7deg) scale(1.06, 0.94); }
+  29%, 45.5% { transform: translateY(0) rotate(0deg) scale(1, 1); }
+  47% { transform: translateY(0) rotate(7deg) scale(1.06, 0.94); }
+  49%, 65.5% { transform: translateY(0) rotate(0deg) scale(1, 1); }
+  67% { opacity: 1; transform: translateY(0) rotate(9deg) scale(1.15, 0.85); }
+  70%, 100% { opacity: 0; transform: translateY(1px) rotate(12deg) scale(0.2, 0.2); }
+}
+
+/* Whole, then one bite, then two. Only the whole treat shows without motion. */
+[data-pet-food-stage="1"],
+[data-pet-food-stage="2"] {
+  opacity: 0;
+}
+
+[data-pet-food-stage="0"] {
+  animation: petFoodStage0 var(--pet-reaction-ms) step-end both;
+}
+
+[data-pet-food-stage="1"] {
+  animation: petFoodStage1 var(--pet-reaction-ms) step-end both;
+}
+
+[data-pet-food-stage="2"] {
+  animation: petFoodStage2 var(--pet-reaction-ms) step-end both;
+}
+
+@keyframes petFoodStage0 {
+  0% { opacity: 1; }
+  26%, 100% { opacity: 0; }
+}
+
+@keyframes petFoodStage1 {
+  0% { opacity: 0; }
+  26% { opacity: 1; }
+  46%, 100% { opacity: 0; }
+}
+
+@keyframes petFoodStage2 {
+  0% { opacity: 0; }
+  46%, 100% { opacity: 1; }
+}
+
+[data-pet-fx="crumb"] {
+  opacity: 0;
+  animation: petCrumb 620ms cubic-bezier(0.2, 0.6, 0.4, 1) both;
+}
+
+@keyframes petCrumb {
+  0% { opacity: 0; translate: 0 0; rotate: 0deg; }
+  8% { opacity: 1; }
+  40% { translate: calc(var(--crumb-x) * 0.6) var(--crumb-rise); rotate: 90deg; }
+  80% { opacity: 1; }
+  100% { opacity: 0; translate: var(--crumb-x) var(--crumb-fall); rotate: 200deg; }
+}
+
+[data-pet-fx="heart"] {
+  opacity: 0;
+  animation: petHeartRise 900ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+@keyframes petHeartRise {
+  0% { opacity: 0; translate: 0 2px; scale: 0.3; }
+  25% { opacity: 1; scale: 1.15; }
+  45% { scale: 0.95; }
+  70% { opacity: 1; }
+  100% { opacity: 0; translate: 2px -16px; scale: 1; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Drink: dip, scoop, tilt back and swallow — three times — then shake  */
+/* ------------------------------------------------------------------ */
+
+[data-pet-cursor] [data-pet-reaction="drink"] {
+  animation: petDrink var(--pet-reaction-ms) cubic-bezier(0.33, 0, 0.2, 1) both;
+}
+
+@keyframes petDrink {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+  8% { transform: translate(0, 0) rotate(-3deg) scale(1.02, 0.98); }
+  14% { transform: translate(-1px, 0) rotate(-6deg) scale(1.01, 0.99); }
+  20% { transform: translate(2px, 2px) rotate(18deg) scale(1.02, 0.98); }
+  25% { transform: translate(2px, 2px) rotate(19deg) scale(1.02, 0.98); }
+  30% { transform: translate(0, -2px) rotate(-14deg) scale(0.97, 1.05); }
+  32.5% { transform: translate(0, -2px) rotate(-14deg) scale(1.01, 0.99); }
+  35% { transform: translate(0, -2px) rotate(-14deg) scale(0.98, 1.03); }
+  37.5% { transform: translate(0, -2px) rotate(-14deg) scale(1.01, 0.99); }
+  40% { transform: translate(0, -1px) rotate(-12deg) scale(0.99, 1.02); }
+  44% { transform: translate(2px, 2px) rotate(18deg) scale(1.02, 0.98); }
+  48% { transform: translate(2px, 2px) rotate(19deg) scale(1.02, 0.98); }
+  53% { transform: translate(0, -2px) rotate(-13deg) scale(0.97, 1.05); }
+  55.5% { transform: translate(0, -2px) rotate(-13deg) scale(1.01, 0.99); }
+  58% { transform: translate(0, -2px) rotate(-13deg) scale(0.98, 1.03); }
+  60.5% { transform: translate(0, -1px) rotate(-11deg) scale(1.01, 0.99); }
+  63% { transform: translate(2px, 2px) rotate(17deg) scale(1.02, 0.98); }
+  66% { transform: translate(2px, 2px) rotate(18deg) scale(1.02, 0.98); }
+  71% { transform: translate(0, -2px) rotate(-12deg) scale(0.97, 1.05); }
+  73.5% { transform: translate(0, -2px) rotate(-12deg) scale(1.01, 0.99); }
+  76% { transform: translate(0, -1px) rotate(-10deg) scale(0.99, 1.02); }
+  80% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+  82% { transform: translate(0, 0) rotate(8deg) scale(1, 1); }
+  84% { transform: translate(0, 0) rotate(-8deg) scale(1, 1); }
+  86% { transform: translate(0, 0) rotate(6deg) scale(1, 1); }
+  88% { transform: translate(0, 0) rotate(-4deg) scale(1, 1); }
+  90% { transform: translate(0, 0) rotate(2deg) scale(1, 1); }
+  92% { transform: translate(0, 0) rotate(0deg) scale(1.03, 0.97); }
+  96% { transform: translate(0, -3px) rotate(0deg) scale(0.98, 1.03); }
+  100% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+}
+
+/* Eyes ease half-shut on each swallow, then "^ ^" once it has had enough. */
+[data-pet-cursor] [data-pet-reaction="drink"] [data-pet-lid] {
+  animation: petDrinkLids var(--pet-reaction-ms) linear both;
+}
+
+[data-pet-cursor] [data-pet-reaction="drink"] [data-pet-eye-smile] {
+  animation: petDrinkSmile var(--pet-reaction-ms) linear both;
+}
+
+@keyframes petDrinkLids {
+  0%, 28% { transform: translateY(-100%); }
+  31%, 39% { transform: translateY(-55%); }
+  42%, 51% { transform: translateY(-100%); }
+  54%, 61% { transform: translateY(-55%); }
+  63%, 69% { transform: translateY(-100%); }
+  72%, 77% { transform: translateY(-55%); }
+  79%, 91% { transform: translateY(-100%); }
+  93%, 99% { transform: translateY(0); }
+  100% { transform: translateY(-100%); }
+}
+
+@keyframes petDrinkSmile {
+  0%, 92% { opacity: 0; }
+  94%, 99% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+[data-pet-bowl] {
+  transform-origin: 50% 100%;
+  animation: petBowl var(--pet-reaction-ms) cubic-bezier(0.3, 0.7, 0.4, 1) both;
+}
+
+@keyframes petBowl {
+  0% { opacity: 0; transform: translateY(6px) scale(0.85, 0.7); }
+  6% { opacity: 1; transform: translateY(-1px) scale(1.04, 1.04); }
+  9%, 92% { opacity: 1; transform: translateY(0) scale(1, 1); }
+  100% { opacity: 0; transform: translateY(3px) scale(0.9, 0.85); }
+}
+
+/* The water level drops a little after each sip. */
+[data-pet-water] {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: petWaterLevel var(--pet-reaction-ms) ease-out both;
+}
+
+@keyframes petWaterLevel {
+  0%, 25% { transform: translateY(0) scale(1, 1); }
+  30%, 48% { transform: translateY(0.5px) scale(0.92, 0.92); }
+  53%, 66% { transform: translateY(1px) scale(0.84, 0.84); }
+  71%, 100% { transform: translateY(1.5px) scale(0.76, 0.76); }
+}
+
+[data-pet-fx="ripple"] {
+  opacity: 0;
+  border: 1px solid rgba(224, 242, 254, 0.95);
+  animation: petRipple 700ms ease-out both;
+}
+
+@keyframes petRipple {
+  0% { opacity: 0; scale: 0.3; }
+  15% { opacity: 1; }
+  100% { opacity: 0; scale: 2.3; }
+}
+
+[data-pet-fx="droplet"] {
+  opacity: 0;
+  background: #38bdf8;
+  border-radius: 50% 0 50% 50%;
+  rotate: -45deg;
+  animation: petDroplet 560ms cubic-bezier(0.2, 0.6, 0.4, 1) both;
+}
+
+@keyframes petDroplet {
+  0% { opacity: 0; translate: 0 0; scale: 0.5; }
+  12% { opacity: 1; scale: 1; }
+  45% { translate: calc(var(--drop-x) * 0.6) var(--drop-rise); }
+  100% { opacity: 0; translate: var(--drop-x) var(--drop-fall); scale: 0.7; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Idle gestures                                                        */
+/* ------------------------------------------------------------------ */
+
+/* Look around: turn to scan behind, turn back, glance up. Blink on turns. */
+[data-pet-cursor] [data-pet-gesture="look-around"] {
+  animation: petLookAround var(--pet-gesture-ms) cubic-bezier(0.3, 0.7, 0.4, 1) both;
+}
+
+[data-pet-cursor] [data-pet-gesture="look-around"] [data-pet-lid] {
+  animation: petTurnBlinks var(--pet-gesture-ms) linear both;
+}
+
+@keyframes petLookAround {
+  0% { transform: rotate(0deg) scale(1, 1); }
+  6% { transform: rotate(0deg) scale(0.94, 1.04); }
+  12% { transform: rotate(0deg) scale(-1, 1); }
+  15% { transform: rotate(0deg) scale(-1.03, 0.97); }
+  19% { transform: rotate(0deg) scale(-1, 1); }
+  30% { transform: rotate(4deg) scale(-1, 1); }
+  40% { transform: rotate(0deg) scale(-1, 1); }
+  48% { transform: rotate(0deg) scale(-0.94, 1.04); }
+  54% { transform: rotate(0deg) scale(1, 1); }
+  57% { transform: rotate(0deg) scale(1.03, 0.97); }
+  64%, 76% { transform: rotate(-5deg) scale(1, 1); }
+  84% { transform: rotate(0deg) scale(1.02, 0.98); }
+  100% { transform: rotate(0deg) scale(1, 1); }
+}
+
+@keyframes petTurnBlinks {
+  0%, 7% { transform: translateY(-100%); }
+  10% { transform: translateY(0); }
+  14%, 47% { transform: translateY(-100%); }
+  51% { transform: translateY(0); }
+  55%, 100% { transform: translateY(-100%); }
+}
+
+/* Head tilt: the curious double-take. */
+[data-pet-cursor] [data-pet-gesture="head-tilt"] {
+  animation: petHeadTilt var(--pet-gesture-ms) cubic-bezier(0.3, 0.7, 0.4, 1) both;
+}
+
+[data-pet-cursor] [data-pet-gesture="head-tilt"] [data-pet-lid] {
+  animation: petSlowBlink var(--pet-gesture-ms) linear both;
+}
+
+@keyframes petHeadTilt {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  12% { transform: translate(0, 0) rotate(-2deg); }
+  24%, 46% { transform: translate(1px, 0) rotate(11deg); }
+  52% { transform: translate(1px, 0) rotate(15deg); }
+  70% { transform: translate(1px, 0) rotate(14deg); }
+  84% { transform: translate(0, 0) rotate(-1.5deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+@keyframes petSlowBlink {
+  0%, 56% { transform: translateY(-100%); }
+  60% { transform: translateY(0); }
+  64%, 100% { transform: translateY(-100%); }
+}
+
+/* Peck: forage at a few seeds on the ground, then look up — birds are wary. */
+[data-pet-cursor] [data-pet-gesture="peck"] {
+  transform-origin: var(--pet-pivot-x, 50%) 100%;
+  animation: petPeck var(--pet-gesture-ms) cubic-bezier(0.33, 0, 0.2, 1) both;
+}
+
+[data-pet-cursor] [data-pet-gesture="peck"] [data-pet-lid] {
+  animation: petPeckBlinks var(--pet-gesture-ms) linear both;
+}
+
+@keyframes petPeck {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+  12% { transform: translate(-1px, 0) rotate(-5deg) scale(1.02, 0.98); }
+  20% { transform: translate(2px, 1px) rotate(15deg) scale(1.02, 0.98); }
+  26% { transform: translate(1px, 0) rotate(3deg) scale(0.99, 1.01); }
+  32% { transform: translate(0, 0) rotate(0deg) scale(1.02, 0.98); }
+  36% { transform: translate(0, 0) rotate(0deg) scale(0.99, 1.01); }
+  43% { transform: translate(-1px, 0) rotate(-4deg) scale(1.01, 0.99); }
+  50% { transform: translate(2px, 1px) rotate(16deg) scale(1.02, 0.98); }
+  56% { transform: translate(1px, 0) rotate(3deg) scale(0.99, 1.01); }
+  62% { transform: translate(0, 0) rotate(0deg) scale(1.02, 0.98); }
+  66% { transform: translate(0, 0) rotate(0deg) scale(0.99, 1.01); }
+  76% { transform: translate(0, -1px) rotate(-3deg) scale(0.98, 1.02); }
+  88% { transform: translate(0, 0) rotate(-3deg) scale(1, 1); }
+  100% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+}
+
+@keyframes petPeckBlinks {
+  0%, 18% { transform: translateY(-100%); }
+  20% { transform: translateY(-56%); }
+  24%, 48% { transform: translateY(-100%); }
+  50% { transform: translateY(-56%); }
+  54%, 100% { transform: translateY(-100%); }
+}
+
+[data-pet-fx="seed"] {
+  opacity: 0;
+  background: #a16207;
+  animation:
+    petSeedIn 220ms ease-out both,
+    petSeedEaten 90ms ease-in forwards;
+}
+
+[data-pet-fx="seed"]:nth-child(2) {
+  background: #ca8a04;
+}
+
+[data-pet-fx="seed"]:nth-child(3) {
+  background: #854d0e;
+}
+
+@keyframes petSeedIn {
+  from { opacity: 0; scale: 0.2; }
+  to { opacity: 1; scale: 1; }
+}
+
+@keyframes petSeedEaten {
+  to { opacity: 0; scale: 0.2; translate: -1px -3px; }
+}
+
+/* Preen: turn toward the tail, nibble, then shake the head out. */
+[data-pet-cursor] [data-pet-gesture="preen"] {
+  animation: petPreen var(--pet-gesture-ms) cubic-bezier(0.33, 0, 0.2, 1) both;
+}
+
+[data-pet-cursor] [data-pet-gesture="preen"] [data-pet-lid] {
+  animation: petPreenLids var(--pet-gesture-ms) linear both;
+}
+
+@keyframes petPreen {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+  10% { transform: translate(0, 0) rotate(4deg) scale(1.01, 0.99); }
+  24% { transform: translate(-1px, 0) rotate(-14deg) scale(0.98, 1.02); }
+  28% { transform: translate(-1px, 0) rotate(-11.5deg) scale(0.98, 1.02); }
+  32% { transform: translate(-1px, 0) rotate(-15deg) scale(0.98, 1.02); }
+  36% { transform: translate(-1px, 0) rotate(-11.5deg) scale(0.98, 1.02); }
+  40% { transform: translate(-1px, 0) rotate(-15deg) scale(0.98, 1.02); }
+  44% { transform: translate(-1px, 0) rotate(-12deg) scale(0.98, 1.02); }
+  48% { transform: translate(-1px, 0) rotate(-14.5deg) scale(0.98, 1.02); }
+  56% { transform: translate(-1px, 0) rotate(-13deg) scale(0.98, 1.02); }
+  62% { transform: translate(0, 0) rotate(-1deg) scale(1.02, 0.98); }
+  66% { transform: translate(0, 0) rotate(5deg) scale(1, 1); }
+  70% { transform: translate(0, 0) rotate(-4deg) scale(1, 1); }
+  74% { transform: translate(0, 0) rotate(2deg) scale(1, 1); }
+  80%, 100% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+}
+
+@keyframes petPreenLids {
+  0%, 20% { transform: translateY(-100%); }
+  26%, 56% { transform: translateY(-45%); }
+  60% { transform: translateY(-100%); }
+  64% { transform: translateY(0); }
+  68%, 100% { transform: translateY(-100%); }
+}
+
+[data-pet-fx="feather"] {
+  opacity: 0;
+  animation: petFeatherFall 1.3s ease-in-out both;
+}
+
+@keyframes petFeatherFall {
+  0% { opacity: 0; translate: 0 0; rotate: 0deg; }
+  10% { opacity: 1; translate: -2px -5px; rotate: -35deg; }
+  35% { translate: 3px 0; rotate: 25deg; }
+  60% { translate: -3px 6px; rotate: -20deg; }
+  85% { opacity: 0.9; translate: 2px 11px; rotate: 12deg; }
+  100% { opacity: 0; translate: 0 14px; rotate: 0deg; }
+}
+
+/* Rouse: feathers raised, a vigorous shake, then sleek again. */
+[data-pet-cursor] [data-pet-gesture="fluff"] {
+  animation: petFluff var(--pet-gesture-ms) cubic-bezier(0.3, 0.7, 0.4, 1) both;
+}
+
+[data-pet-cursor] [data-pet-gesture="fluff"] [data-pet-lid] {
+  animation: petFluffLids var(--pet-gesture-ms) linear both;
+}
+
+@keyframes petFluff {
+  0% { transform: rotate(0deg) scale(1, 1); }
+  10% { transform: rotate(0deg) scale(0.98, 1.02); }
+  20% { transform: rotate(0deg) scale(1.1, 1.08); }
+  25% { transform: rotate(5deg) scale(1.1, 1.08); }
+  30% { transform: rotate(-5deg) scale(1.1, 1.07); }
+  35% { transform: rotate(5deg) scale(1.09, 1.07); }
+  40% { transform: rotate(-4deg) scale(1.08, 1.06); }
+  45% { transform: rotate(3deg) scale(1.06, 1.04); }
+  50% { transform: rotate(-2deg) scale(1.04, 1.03); }
+  58% { transform: rotate(0deg) scale(0.97, 1.02); }
+  70% { transform: rotate(0deg) scale(1.01, 0.99); }
+  100% { transform: rotate(0deg) scale(1, 1); }
+}
+
+@keyframes petFluffLids {
+  0%, 20% { transform: translateY(-100%); }
+  24%, 50% { transform: translateY(0); }
+  56%, 100% { transform: translateY(-100%); }
+}
+
+/* Yawn on the way to drowsy: stretch up, eyes squeezed, a little shiver. */
+[data-pet-cursor] [data-pet-gesture="yawn"] {
+  animation: petYawn var(--pet-gesture-ms) cubic-bezier(0.3, 0.6, 0.4, 1) both;
+}
+
+[data-pet-cursor] [data-pet-gesture="yawn"] [data-pet-lid] {
+  animation: petYawnLids var(--pet-gesture-ms) ease-in-out both;
+}
+
+[data-pet-cursor] [data-pet-gesture="yawn"] [data-pet-eye-line] {
+  animation: petYawnLine var(--pet-gesture-ms) linear both;
+}
+
+@keyframes petYawn {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+  28% { transform: translate(0, -1px) rotate(-5deg) scale(0.95, 1.08); }
+  52% { transform: translate(0, -1px) rotate(-6deg) scale(0.94, 1.09); }
+  60% { transform: translate(0, 0) rotate(-1deg) scale(1.03, 0.97); }
+  66% { transform: translate(0, 0) rotate(1.5deg) scale(1, 1); }
+  70% { transform: translate(0, 0) rotate(-1.5deg) scale(1, 1); }
+  74% { transform: translate(0, 0) rotate(1deg) scale(1, 1); }
+  82%, 100% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+}
+
+/* Ends half-shut: a yawn always leads into the drowsy pose. */
+@keyframes petYawnLids {
+  0% { transform: translateY(-100%); }
+  22%, 58% { transform: translateY(0); }
+  78% { transform: translateY(-60%); }
+  100% { transform: translateY(-48%); }
+}
+
+@keyframes petYawnLine {
+  0%, 20% { opacity: 0; }
+  24%, 56% { opacity: 1; }
+  62%, 100% { opacity: 0; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Wander: turn, two hops out, sniff and look about, two hops home      */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The path is the individual `translate` property and the body is
+ * `transform`, so the two compose. The care button runs the same path so its
+ * click target goes wherever the pet goes. Hops travel only while airborne;
+ * landings match `WANDER_LANDINGS` in pet-gesture-fx.tsx.
+ */
+[data-pet-cursor] [data-pet-gesture="wander"] {
+  animation:
+    petWanderPath var(--pet-gesture-ms) linear both,
+    petWanderBody var(--pet-gesture-ms) cubic-bezier(0.3, 0.6, 0.4, 1) both;
+}
+
+[data-pet-wander] {
+  animation: petWanderPath var(--pet-gesture-ms) linear both;
+}
+
+[data-pet-cursor] [data-pet-gesture="wander"] [data-pet-shadow] {
+  animation: petWanderShadow var(--pet-gesture-ms) cubic-bezier(0.3, 0.6, 0.4, 1) both;
+}
+
+[data-pet-cursor] [data-pet-gesture="wander"] [data-pet-lid] {
+  animation: petWanderBlinks var(--pet-gesture-ms) linear both;
+}
+
+@keyframes petWanderPath {
+  0%, 10% { translate: 0 0; }
+  18%, 22% { translate: -22px 0; }
+  30%, 60% { translate: -44px 0; }
+  68%, 72% { translate: -22px 0; }
+  80%, 100% { translate: 0 0; }
+}
+
+/* Facing left the flip mirrors rotation, so nose-up is positive there. */
+@keyframes petWanderBody {
+  0% { transform: translateY(0) rotate(0deg) scale(1, 1); }
+  4% { transform: translateY(0) rotate(0deg) scale(0.92, 1.05); }
+  8% { transform: translateY(0) rotate(0deg) scale(-1, 1); }
+  10% { transform: translateY(0) rotate(0deg) scale(-1.08, 0.9); }
+  14% { transform: translateY(-9px) rotate(4deg) scale(-0.95, 1.07); }
+  18% { transform: translateY(0) rotate(0deg) scale(-1.08, 0.9); }
+  20% { transform: translateY(0) rotate(0deg) scale(-1, 1); }
+  22% { transform: translateY(0) rotate(0deg) scale(-1.08, 0.9); }
+  26% { transform: translateY(-9px) rotate(4deg) scale(-0.95, 1.07); }
+  30% { transform: translateY(0) rotate(0deg) scale(-1.08, 0.9); }
+  33% { transform: translateY(0) rotate(0deg) scale(-1, 1); }
+  39% { transform: translateY(0) rotate(-12deg) scale(-1, 1); }
+  42% { transform: translateY(0) rotate(0deg) scale(-1, 1); }
+  47% { transform: translateY(0) rotate(5deg) scale(-1, 1); }
+  52% { transform: translateY(0) rotate(0deg) scale(-1, 1); }
+  56% { transform: translateY(0) rotate(0deg) scale(-0.92, 1.05); }
+  59% { transform: translateY(0) rotate(0deg) scale(1, 1); }
+  60% { transform: translateY(0) rotate(0deg) scale(1.08, 0.9); }
+  64% { transform: translateY(-9px) rotate(-4deg) scale(0.95, 1.07); }
+  68% { transform: translateY(0) rotate(0deg) scale(1.08, 0.9); }
+  70% { transform: translateY(0) rotate(0deg) scale(1, 1); }
+  72% { transform: translateY(0) rotate(0deg) scale(1.08, 0.9); }
+  76% { transform: translateY(-9px) rotate(-4deg) scale(0.95, 1.07); }
+  80% { transform: translateY(0) rotate(0deg) scale(1.08, 0.9); }
+  84% { transform: translateY(0) rotate(0deg) scale(1, 1); }
+  90% { transform: translateY(0) rotate(0deg) scale(1.02, 0.98); }
+  100% { transform: translateY(0) rotate(0deg) scale(1, 1); }
+}
+
+/* The shadow stays on the ground, shrinking while the pet is in the air. */
+@keyframes petWanderShadow {
+  0%, 10%, 18%, 22%, 30%, 60%, 68%, 72%, 80%, 100% {
+    transform: translateX(-50%) translateY(0) scale(1);
+    opacity: 1;
+  }
+  14%, 26%, 64%, 76% {
+    transform: translateX(-50%) translateY(9px) scale(0.7);
+    opacity: 0.55;
+  }
+}
+
+@keyframes petWanderBlinks {
+  0%, 4% { transform: translateY(-100%); }
+  6% { transform: translateY(0); }
+  9%, 54% { transform: translateY(-100%); }
+  57% { transform: translateY(0); }
+  60%, 100% { transform: translateY(-100%); }
+}
+
+[data-pet-fx="dust"] {
+  opacity: 0;
+  background: radial-gradient(
+    circle at 40% 35%,
+    #f5f5f4 0 18%,
+    #d6d3d1 46%,
+    rgba(168, 162, 158, 0) 74%
+  );
+  animation: petDust 520ms ease-out both;
+}
+
+@keyframes petDust {
+  0% { opacity: 0; scale: 0.4; translate: 0 0; }
+  20% { opacity: 0.9; }
+  100% { opacity: 0; scale: 1.8; translate: 0 -3px; }
+}
+
+[data-pet-fx="steam"] {
+  opacity: 0;
+  background: radial-gradient(
+    circle at 38% 35%,
+    #f8fafc 0 20%,
+    #cbd5e1 46%,
+    rgba(148, 163, 184, 0) 72%
+  );
+  animation: petSteam 760ms ease-out both;
+}
+
+@keyframes petSteam {
+  0% { opacity: 0; scale: 0.3; translate: 0 2px; }
+  25% { opacity: 1; }
+  100% { opacity: 0; scale: 1.9; translate: 2px -14px; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Reduced motion                                                       */
+/* ------------------------------------------------------------------ */
+
+/*
+ * No motion at all. The treat and the bowl still appear for the length of the
+ * reaction (they say what is happening), but every particle stays hidden and
+ * the pet itself stays still.
+ */
+@media (prefers-reduced-motion: reduce) {
+  [data-pet-attention] {
+    rotate: none;
+    translate: none;
+    transition: none;
+  }
+
+  /* Specificity matches the rules above (three attributes for the parts). */
+  [data-pet-attention][data-pet-petted],
+  [data-pet-petted] [data-pet-lid],
+  [data-pet-petted] [data-pet-eye-smile],
+  [data-pet-cursor] [data-pet-reaction="eat"],
+  [data-pet-cursor] [data-pet-reaction="drink"],
+  [data-pet-cursor] [data-pet-gesture],
+  [data-pet-cursor] [data-pet-reaction] [data-pet-lid],
+  [data-pet-cursor] [data-pet-reaction] [data-pet-eye-smile],
+  [data-pet-cursor] [data-pet-gesture] [data-pet-lid],
+  [data-pet-cursor] [data-pet-gesture] [data-pet-eye-line],
+  [data-pet-cursor] [data-pet-gesture] [data-pet-shadow],
+  [data-pet-wander],
+  [data-pet-food],
+  [data-pet-food-stage],
+  [data-pet-bowl],
+  [data-pet-water],
+  [data-pet-fx] {
+    animation: none;
+  }
+}

@@ -4,11 +4,7 @@ import dynamic from "next/dynamic";
 import { MessageCircleIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-import { PetArtwork } from "@/components/pet-artwork";
-import {
-  usePetFollowCursor,
-  useSelectedPet,
-} from "@/components/use-selected-pet";
+import { usePetFollowCursor } from "@/components/use-selected-pet";
 import { setPetChatOpen, togglePetChat, usePetChatOpen } from "@/components/use-pet-chat";
 import { setPetParked } from "@/components/use-pet-parked";
 import { FIRST_NAME } from "@/lib/assistant-persona";
@@ -49,7 +45,6 @@ function useMediaQuery(query: string): boolean {
 export default function PetChatLauncher() {
   const chatOpen = usePetChatOpen();
   const followCursor = usePetFollowCursor();
-  const selectedPet = useSelectedPet();
   const isDesktop = useMediaQuery(DESKTOP_POINTER_QUERY);
   const reducedMotion = useMediaQuery(REDUCED_MOTION_QUERY);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -72,7 +67,7 @@ export default function PetChatLauncher() {
   // In static mode on desktop the sprite itself is the button — that lives in
   // `pet-cursor.tsx`, where the sprite's geometry is defined. This component
   // covers the two cases that sprite cannot: a pet roaming after the cursor,
-  // and mobile, where `PetCursor` renders nothing at all.
+  // and mobile, where there is no pet at all — just a plain chat button.
   const needsOwnTrigger = !isDesktop || followCursor;
 
   return (
@@ -96,18 +91,10 @@ export default function PetChatLauncher() {
             isDesktop
               ? "bottom-6 right-6 size-11"
               : // Clears the Navbar dock, which occupies roughly 16–72px.
-                "bottom-20 right-4 size-14 overflow-hidden"
+                "bottom-20 right-4 size-14"
           )}
         >
-          {isDesktop ? (
-            <MessageCircleIcon className="size-5" />
-          ) : (
-            // Below the desktop gate PetCursor renders nothing, so the launcher
-            // brings its own pet — the same move pet-greeting.tsx makes.
-            <span className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 scale-[0.62]">
-              <PetArtwork petId={selectedPet} />
-            </span>
-          )}
+          <MessageCircleIcon className={isDesktop ? "size-5" : "size-6"} />
         </button>
       ) : null}
 

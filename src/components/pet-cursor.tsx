@@ -33,6 +33,25 @@ import {
   type PetTreat,
 } from "@/components/use-pet-care";
 import { usePetIdle } from "@/components/use-pet-idle";
+import { usePetAttention } from "@/components/use-pet-attention";
+import { PetCareScene } from "@/components/pet-care-scene";
+import { PetGestureFx } from "@/components/pet-gesture-fx";
+import { PetLabPanel } from "@/components/pet-lab-panel";
+import {
+  getGestureDuration,
+  getHopStyle,
+  getPetAnchorsPx,
+  getReactionDuration,
+} from "@/components/pet-rig";
+import {
+  createHop,
+  getHopGroundPosition,
+  getHopPose,
+  getHopTransforms,
+  shouldHopWalk,
+  type Hop,
+  type HopPose,
+} from "@/lib/pet/hop-walk";
 import { FIRST_NAME } from "@/lib/assistant-persona";
 import {
   AppleIcon,
@@ -48,7 +67,11 @@ type Point = {
   y: number;
 };
 
-type FlightPhase = "idle" | "aiming" | "flying" | "landing";
+/**
+ * `hopping` is the short-trip gait: birds hop toward a nearby cursor and only
+ * slingshot when it is far (`HOP_WALK_MAX_DISTANCE`). See `lib/pet/hop-walk`.
+ */
+type FlightPhase = "idle" | "aiming" | "flying" | "landing" | "hopping";
 
 type FlightState = {
   phase: FlightPhase;
@@ -61,9 +84,10 @@ type FlightState = {
   direction: number;
   lastParticleAt: number;
   landingStartedAt: number;
+  hop: Hop | null;
 };
 
-type FlightParticleKind = "smoke" | "streak" | "poof";
+type FlightParticleKind = "smoke" | "streak" | "poof" | "dust";
 
 type FlightParticle = {
   id: number;
@@ -110,6 +134,7 @@ function createIdleFlightState(phase: FlightPhase = "idle"): FlightState {
     direction: 1,
     lastParticleAt: 0,
     landingStartedAt: 0,
+    hop: null,
   };
 }
 
@@ -203,6 +228,7 @@ function createFlight(
     direction,
     lastParticleAt: 0,
     landingStartedAt: 0,
+    hop: null,
   };
 }
 
@@ -236,14 +262,27 @@ export default function PetCursor() {
   const [isEnabled, setIsEnabled] = useState(false);
   const [careMenuOpen, setCareMenuOpen] = useState(false);
   const careEnabled = isEnabled && !followCursor && !parked && !chatOpen;
-  const care = usePetCare(careEnabled);
+  const care = usePetCare(careEnabled, selectedPet);
   // Idle life belongs to the parked pet only — a pet chasing the cursor is
   // already expressing itself through the walk/flight machine.
   const {
     phase: idlePhase,
     gesture: idleGesture,
     eyes: idleEyes,
-  } = usePetIdle(careEnabled && !careMenuOpen && !care.reaction);
+    trigger: triggerGesture,
+  } = usePetIdle(careEnabled && !careMenuOpen && !care.reaction, selectedPet);
+  // Noticing the cursor is for an awake pet that is not busy with something
+  // else; a gesture or a reaction owns the body while it runs.
+  const attentionRef = useRef<HTMLDivElement>(null);
+  const { petted, hoverHandlers } = usePetAttention(
+    careEnabled &&
+      !careMenuOpen &&
+      !care.reaction &&
+      idlePhase !== "asleep" &&
+      idleGesture === "none",
+    attentionRef
+  );
+  const [petLabRequested, setPetLabRequested] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isMoving, setIsMoving] = useState(false);
   const [flightPhase, setFlightPhase] = useState<FlightPhase>("idle");
@@ -266,6 +305,16 @@ export default function PetCursor() {
     selectedPetRef.current = selectedPet;
     movementTypeRef.current = movementType;
   }, [movementType, selectedPet]);
+
+  // Dev-only review panel (`?petlab`). Deferred a frame like the other
+  // client-only reads here, so the first render matches the server's.
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "development") return;
+    const frame = window.requestAnimationFrame(() =>
+      setPetLabRequested(new URLSearchParams(window.location.search).has("petlab"))
+    );
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
 
   useEffect(() => {
     if (!followCursor && !parked && !chatOpen) return;
@@ -486,26 +535,34 @@ export default function PetCursor() {
       const newParticles = Array.from({ length: count }, (_, index) => {
         const spread = index - (count - 1) / 2;
         const jitter = Math.random() - 0.5;
+        const isDust = kind === "dust";
         const size =
           kind === "streak"
             ? 18 + Math.random() * 16
             : kind === "poof"
               ? 15 + Math.random() * 18
-              : 9 + Math.random() * 12;
+              : isDust
+                ? 5 + Math.random() * 4
+                : 9 + Math.random() * 12;
 
         return {
           id: particleIdRef.current++,
           kind,
-          x: origin.x + jitter * 14,
-          y: origin.y + 18 + spread * 3,
+          // Dust is kicked up at the feet, not the body.
+          x: origin.x + jitter * (isDust ? 8 : 14),
+          y: origin.y + (isDust ? -2 : 18 + spread * 3),
           dx:
             kind === "streak"
               ? -direction * (36 + Math.random() * 24)
-              : -direction * (12 + Math.random() * 24),
+              : isDust
+                ? spread * 10 - direction * 3
+                : -direction * (12 + Math.random() * 24),
           dy:
             kind === "streak"
               ? spread * 2
-              : -8 - Math.random() * 22 + Math.abs(spread) * 3,
+              : isDust
+                ? -3 - Math.random() * 4
+                : -8 - Math.random() * 22 + Math.abs(spread) * 3,
           size,
           angle:
             kind === "streak"
@@ -514,7 +571,8 @@ export default function PetCursor() {
                 : 174 - spread * 5
               : Math.random() * 24 - 12,
           createdAt: time,
-          duration: kind === "streak" ? 260 : kind === "poof" ? 520 : 620,
+          duration:
+            kind === "streak" ? 260 : kind === "poof" ? 520 : isDust ? 420 : 620,
         };
       });
 
@@ -668,6 +726,36 @@ export default function PetCursor() {
       }
     };
 
+    const setHopVisual = (pose: HopPose, height: number) => {
+      if (!birdImageRef.current || !birdShadowRef.current) {
+        return;
+      }
+
+      const transforms = getHopTransforms(pose, height);
+      birdImageRef.current.style.transform = transforms.image;
+      birdImageRef.current.style.filter = "";
+      birdShadowRef.current.style.transform = transforms.shadow;
+      birdShadowRef.current.style.opacity = transforms.shadowOpacity;
+    };
+
+    const beginHop = (time: number) => {
+      const hop = createHop(
+        positionRef.current,
+        targetRef.current,
+        time,
+        getHopStyle(selectedPetRef.current)
+      );
+      setFlightState({
+        ...createIdleFlightState("hopping"),
+        direction: hop.direction,
+        hop,
+      });
+      setMoving(true);
+    };
+
+    const isShortTrip = (distance: number) =>
+      shouldHopWalk(distance, FLIGHT_ARRIVAL_THRESHOLD, reducedMotionRef.current);
+
     const beginFlight = (time: number) => {
       const position = positionRef.current;
       const target = targetRef.current;
@@ -725,7 +813,9 @@ export default function PetCursor() {
 
       if (movementTypeRef.current === "fly") {
         const flight = flightRef.current;
-        if (flight.phase !== "flying") {
+        // A hop in progress finishes before the bird re-aims, exactly like a
+        // flight does; the next hop then heads for the new target.
+        if (flight.phase !== "flying" && flight.phase !== "hopping") {
           setFlightState(createIdleFlightState("aiming"));
         }
         setFacing(nextTarget.x - positionRef.current.x);
@@ -806,11 +896,48 @@ export default function PetCursor() {
 
       if (flight.phase === "aiming") {
         setFacing(dx);
+
+        // Short trips are hopped, not flown, and need no wind-up: a bird
+        // hops after a nearby target straight away.
+        if (isShortTrip(distance)) {
+          beginHop(time);
+          return;
+        }
+
         setAimingVisual(time, dx);
         setMoving(true);
 
         if (time - lastPointerMoveRef.current >= FLIGHT_IDLE_DELAY_MS) {
           beginFlight(time);
+        }
+        return;
+      }
+
+      if (flight.phase === "hopping" && flight.hop) {
+        const hop = flight.hop;
+        const progress = clamp((time - hop.startedAt) / hop.durationMs, 0, 1);
+        const ground = getHopGroundPosition(hop, progress);
+
+        positionRef.current = ground;
+        setPosition(ground);
+        setFacing(hop.end.x - hop.start.x);
+        setHopVisual(getHopPose(progress), hop.height);
+        setMoving(true);
+
+        if (progress >= 1) {
+          emitParticles("dust", hop.end, 2, hop.direction, time);
+          resetFlightVisual();
+          const remaining = getDistance(hop.end, targetRef.current);
+
+          if (isShortTrip(remaining)) {
+            beginHop(time);
+          } else if (remaining > FLIGHT_ARRIVAL_THRESHOLD) {
+            // The cursor ran off: aim and slingshot after it as before.
+            setFlightState(createIdleFlightState("aiming"));
+          } else {
+            setFlightState(createIdleFlightState());
+            setMoving(false);
+          }
         }
         return;
       }
@@ -974,6 +1101,15 @@ export default function PetCursor() {
   const activeFlightPhase = followCursor ? flightPhase : "idle";
   const activeWalking = followCursor && movementType === "walk" && isMoving;
   const activeFlying = followCursor && movementType === "fly" && isMoving;
+  // Durations are owned by pet-rig.ts and handed to CSS, so the keyframes in
+  // src/styles/pet-motion/ can never disagree with the timers that end them.
+  const motionStyle = {
+    "--pet-reaction-ms": `${care.reaction ? getReactionDuration(selectedPet, care.reaction) : 0}ms`,
+    "--pet-gesture-ms": `${getGestureDuration(selectedPet, idleGesture)}ms`,
+    "--pet-pivot-x": `${getPetAnchorsPx(selectedPet).pivotXPercent.toFixed(1)}%`,
+  } as CSSProperties;
+  const showPetLab =
+    process.env.NODE_ENV === "development" && petLabRequested && careEnabled;
 
   return (
     <>
@@ -1052,7 +1188,12 @@ export default function PetCursor() {
         <button
           type="button"
           data-pet-care-ui
+          // Follows the pet on its wander so the click target never strands.
+          data-pet-wander={idleGestureAttr === "wander" || undefined}
+          style={motionStyle}
           onClick={() => setCareMenuOpen((open) => !open)}
+          onPointerEnter={hoverHandlers.onPointerEnter}
+          onPointerLeave={hoverHandlers.onPointerLeave}
           aria-haspopup="menu"
           aria-expanded={careMenuOpen}
           aria-label={`Care for ${getPetById(selectedPet).name}`}
@@ -1099,34 +1240,54 @@ export default function PetCursor() {
                 opacity: isVisible ? 1 : 0,
                 transform: "translate3d(120px, 120px, 0)",
               }
-            : { opacity: 1 }
+            : { opacity: 1, ...motionStyle }
         }
       >
         <div ref={spriteRef} style={{ transform: "scaleX(1)" }}>
           {/*
-            Two wrappers, not one. The sprite div above owns an inline
+            Three wrappers, not one. The sprite div above owns an inline
             `scaleX` for facing, so an animation there would be overridden;
-            and the sleep tilt has to be a *transition* while the breathing is
-            an *animation*, which the same property on one element cannot be.
-            So: pose (tilt) outside, breath and gestures inside.
+            the cursor lean is a *transition* on the individual rotate and
+            translate properties; and the sleep tilt has to be a *transition*
+            while the breathing is an *animation*, which the same property on
+            one element cannot be. So: lean outermost, then pose (tilt), then
+            breath, gestures and care reactions inside.
           */}
-          <div data-pet-pose={idlePose} data-pet-eyes={idleEyesAttr}>
-            <div
-              data-pet-idle={idlePose}
-              data-pet-gesture={idleGestureAttr}
-              data-pet-reaction={care.reaction ?? undefined}
-            >
-              <PetArtwork
-                petId={selectedPet}
-                moving={activeWalking}
-                imageRef={birdImageRef}
-                shadowRef={birdShadowRef}
-              />
+          <div
+            ref={attentionRef}
+            data-pet-attention={!followCursor || undefined}
+            data-pet-petted={petted || undefined}
+          >
+            <div data-pet-pose={idlePose} data-pet-eyes={idleEyesAttr}>
+              <div
+                data-pet-idle={idlePose}
+                data-pet-gesture={idleGestureAttr}
+                data-pet-reaction={care.reaction ?? undefined}
+              >
+                <PetArtwork
+                  petId={selectedPet}
+                  moving={activeWalking}
+                  imageRef={birdImageRef}
+                  shadowRef={birdShadowRef}
+                />
+              </div>
             </div>
           </div>
 
           {care.reaction ? (
-            <PetCareReactionItem reaction={care.reaction} treat={care.treat} />
+            <PetCareScene
+              petId={selectedPet}
+              reaction={care.reaction}
+              treat={care.treat}
+            />
+          ) : null}
+
+          {!followCursor ? (
+            <PetGestureFx
+              petId={selectedPet}
+              gesture={idleGestureAttr}
+              petted={petted}
+            />
           ) : null}
 
           {/* Two drifting Z's, offset so they never travel as a pair. */}
@@ -1152,6 +1313,17 @@ export default function PetCursor() {
           ) : null}
         </div>
       </div>
+
+      {showPetLab ? (
+        <PetLabPanel
+          petId={selectedPet}
+          busy={isReacting}
+          onGesture={triggerGesture}
+          onFeed={care.feed}
+          onWater={care.giveWater}
+          onPlay={care.play}
+        />
+      ) : null}
     </>
   );
 }
@@ -1301,40 +1473,6 @@ function PetCareMenu({
         Ask {FIRST_NAME}&rsquo;s assistant
       </button>
     </div>
-  );
-}
-
-function PetCareReactionItem({
-  reaction,
-  treat,
-}: {
-  reaction: "eat" | "drink" | "play";
-  treat: PetTreat | null;
-}) {
-  const treatEmoji: Record<PetTreat, string> = {
-    apple: "🍎",
-    berries: "🫐",
-    cookie: "🍪",
-  };
-
-  if (reaction === "play") {
-    return (
-      <span aria-hidden="true" data-pet-play-sparkles className="absolute inset-0">
-        <span>✦</span>
-        <span>♥</span>
-        <span>✦</span>
-      </span>
-    );
-  }
-
-  return (
-    <span
-      aria-hidden="true"
-      data-pet-care-item={reaction}
-      className="absolute z-10 select-none"
-    >
-      {reaction === "eat" && treat ? treatEmoji[treat] : "💧"}
-    </span>
   );
 }
 

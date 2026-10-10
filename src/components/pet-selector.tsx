@@ -57,7 +57,7 @@ export default function PetSelector() {
     isOpen && typeof document !== "undefined"
       ? createPortal(
           <div
-            className="fixed inset-0 z-50 hidden sm:flex items-end justify-center bg-background/35 p-6 pb-24 backdrop-blur-sm md:items-center md:pb-6"
+            className="fixed inset-0 z-50 hidden pet-host:flex items-end justify-center bg-background/35 p-6 pb-24 backdrop-blur-sm md:items-center md:pb-6"
             role="dialog"
             aria-modal="true"
             aria-labelledby="pet-selector-title"
@@ -174,7 +174,7 @@ export default function PetSelector() {
             aria-label={`Pets, selected ${selectedPetOption.name}`}
             aria-haspopup="dialog"
             aria-expanded={isOpen}
-            className="hidden sm:inline-flex"
+            className="hidden pet-host:inline-flex"
             onClick={() => setIsOpen(true)}
           >
             <DockIcon className="rounded-3xl cursor-pointer size-full bg-background p-0 text-muted-foreground hover:text-foreground hover:bg-muted backdrop-blur-3xl border border-border transition-colors">

@@ -1,9 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { PetId } from "@/components/pet-artwork";
+import { getReactionDuration, type PetReaction } from "@/components/pet-rig";
 
+export type { PetReaction };
 export type PetNeed = "food" | "water";
-export type PetReaction = "eat" | "drink" | "play";
 export type PetTreat = "apple" | "berries" | "cookie";
 
 const FIRST_REQUEST_MIN_MS = 16_000;
@@ -11,12 +13,6 @@ const FIRST_REQUEST_MAX_MS = 24_000;
 const NEXT_REQUEST_MIN_MS = 95_000;
 const NEXT_REQUEST_MAX_MS = 150_000;
 const REQUEST_VISIBLE_MS = 14_000;
-
-const REACTION_DURATION: Record<PetReaction, number> = {
-  eat: 1_650,
-  drink: 1_700,
-  play: 1_350,
-};
 
 const TREAT_FEEDBACK: Record<PetTreat, string[]> = {
   apple: ["Crunchy. Perfect.", "Apple-powered!"],
@@ -43,7 +39,7 @@ function pick<T>(items: readonly T[]): T {
  * window. That keeps the pet feeling alive without turning a portfolio into a
  * tamagotchi dashboard.
  */
-export function usePetCare(enabled: boolean) {
+export function usePetCare(enabled: boolean, petId: PetId) {
   const [need, setNeed] = useState<PetNeed | null>(null);
   const [reaction, setReaction] = useState<PetReaction | null>(null);
   const [treat, setTreat] = useState<PetTreat | null>(null);
@@ -51,6 +47,12 @@ export function usePetCare(enabled: boolean) {
   const requestCountRef = useRef(0);
   const reactionTimerRef = useRef<number | undefined>(undefined);
   const feedbackTimerRef = useRef<number | undefined>(undefined);
+  // Read when a reaction starts, so `react` stays referentially stable.
+  const petIdRef = useRef<PetId>(petId);
+
+  useEffect(() => {
+    petIdRef.current = petId;
+  }, [petId]);
 
   useEffect(() => {
     if (!enabled) {
@@ -124,7 +126,7 @@ export function usePetCare(enabled: boolean) {
         () => setFeedback(null),
         2_300
       );
-    }, REACTION_DURATION[next]);
+    }, getReactionDuration(petIdRef.current, next));
   }, []);
 
   return {
